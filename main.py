@@ -15,8 +15,7 @@ import os
 import warnings
 import pandas as pd
 import numpy as np
-#import matplotlib.pyplot as plt
-from streamlit_modal import Modal
+import matplotlib.pyplot as plt
 from datetime import time
 import requests
 import json
