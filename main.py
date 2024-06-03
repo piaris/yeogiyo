@@ -22,10 +22,13 @@ import requests
 import json
 from pandas import json_normalize
 
+<<<<<<< HEAD
 from streamlit_extras.buy_me_a_coffee import button
 
 button(username="yuseongmin", floating=True, width=221)
 
+=======
+>>>>>>> ba019e1a0ddfc38fd62febb7599022ca57d622de
 import streamlit as st
 import os
 
@@ -40,18 +43,31 @@ import os
 
 
 # 테스트 데이터 가져오기
+<<<<<<< HEAD
 df = pd.read_csv("Data/서울시115장소명 목록_장소명수정_20240527.csv", encoding="cp949")
 city_df = df[["CATEGORY", "AREA_SEARCH"]]
 # st.dataframe(city_df)
 category = city_df["CATEGORY"].unique()
 area_list = df["AREA_NM"]
 # st.text(category)
+=======
+df = pd.read_csv("Data/서울시115장소명 목록_장소명수정_20240527.csv", encoding='cp949')
+city_df = df[['CATEGORY', 'AREA_SEARCH']]
+#st.dataframe(city_df)
+category = city_df['CATEGORY'].unique()
+area_list = df['AREA_NM']
+#st.text(category)
+>>>>>>> ba019e1a0ddfc38fd62febb7599022ca57d622de
 
 # 기본 설정
 # 한글폰트 설정
 from matplotlib import font_manager as fm
 
+<<<<<<< HEAD
 fpath = os.path.join(os.getcwd(), "Fonts/GmarketSansTTFBold.ttf")
+=======
+fpath = os.path.join(os.getcwd(), "Fonts/GmarketSansTTFBold.ttf") 
+>>>>>>> ba019e1a0ddfc38fd62febb7599022ca57d622de
 prop = fm.FontProperties(fname=fpath)
 # print(plt.rcParams['font.family'])
 # plt.rcParams['font.family'] = "NanumGothic"
@@ -113,6 +129,20 @@ with st.sidebar:
         "---"
     )
 
+<<<<<<< HEAD
+=======
+    
+
+
+
+
+    st.markdown("## How to use\n"
+                "1. Select Date and Time\n"
+                "2. Select location\n"
+                "3. Run\n"
+                "---")
+    
+>>>>>>> ba019e1a0ddfc38fd62febb7599022ca57d622de
     # st.link_button("서울시 도시 데이터 바로가기", "https://data.seoul.go.kr/SeoulRtd/")
     # @st.experimental_dialog("about seoul city data")
     def show_dialog():
@@ -131,9 +161,15 @@ with st.sidebar:
 # 2. 날짜 & 시간 선택 객체 저장 필요
 select_date = st.date_input("When is your date", value=None)
 # select_time = st.time_input("Select your time", value=None, step=3600)
+<<<<<<< HEAD
 # time = st.time_input("What time do you meet", value=None, step=None)
 # st.write("당신의 약속시간은: ", select_date, select_time)
 # st.write("Your meeting time is:", time)
+=======
+#time = st.time_input("What time do you meet", value=None, step=None)
+# st.write("당신의 약속시간은: ", select_date, select_time)
+#st.write("Your meeting time is:", time)
+>>>>>>> ba019e1a0ddfc38fd62febb7599022ca57d622de
 
 # 3. 3개 탭 생성
 tab1, tab2, tab3 = st.tabs(["area1", "area2", "area3"])
@@ -203,7 +239,11 @@ with tab1:
 
     st.pyplot(fig)
 
+<<<<<<< HEAD
     # container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
+=======
+    #container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
+>>>>>>> ba019e1a0ddfc38fd62febb7599022ca57d622de
     container2 = st.container()
     container2.subheader("This is Hot keyword in area")
     # to do : 텍스트 리스트 받아서 naver_keyword라는 객체에 저장, 버튼 포문 돌려서 하나씩 링크버튼 생성
