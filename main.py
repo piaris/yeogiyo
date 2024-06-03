@@ -26,6 +26,7 @@ from pandas import json_normalize
 import streamlit as st
 import os
 
+buy_me_a_coffee.button("a", floating=True)
 
 # Sql database conncet
 # @st.cache
@@ -104,7 +105,15 @@ with st.sidebar:
         st.divider()
         st.info(ppltn_data["AREA_CONGEST_MSG"])
 
+    html="""
+<div class="kakao-ad">
+    <ins class="kakao_ad_area" style="display:none;" data-ad-unit = "DAN-86TXzzikI88p46NB" data-ad-width = "320"
+        data-ad-height = "100"></ins>
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+</div>
+"""
 
+    st.markdown(html, unsafe_allow_html=True)
     
 
 
@@ -248,15 +257,7 @@ with tab1:
 
 
 
-html="""<div class="kakao-ad">
-    <ins class="kakao_ad_area" style="display:none;"
-data-ad-unit = "DAN-86TXzzikI88p46NB"
-data-ad-width = "320"
-data-ad-height = "100"></ins>
-<script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
-</div>"""
 
-st.markdown(html, unsafe_allow_html=True)
 
 
 
