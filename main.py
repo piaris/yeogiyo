@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from streamlit_modal import Modal
+from streamlit_extras import buy_me_a_coffee
 from datetime import time
 import requests
 import json
@@ -247,8 +248,15 @@ with tab1:
 
 
 
+html="""<div class="kakao-ad">
+    <ins class="kakao_ad_area" style="display:none;"
+data-ad-unit = "DAN-86TXzzikI88p46NB"
+data-ad-width = "320"
+data-ad-height = "100"></ins>
+<script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+</div>"""
 
-
+st.markdown(html, unsafe_allow_html=True)
 
 
 
