@@ -35,7 +35,7 @@ import streamlit as st
 
 
 # 테스트 데이터 가져오기
-df = pd.read_csv("data\서울시115장소명 목록_장소명수정_20240527.csv", encoding='cp949')
+df = pd.read_csv("Data\서울시115장소명 목록_장소명수정_20240527.csv", encoding='cp949')
 city_df = df[['CATEGORY', 'AREA_SEARCH']]
 #st.dataframe(city_df)
 category = city_df['CATEGORY'].unique()

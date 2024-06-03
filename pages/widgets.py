@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from streamlit_modal import Modal
 from datetime import datetime as dt
 import datetime
 
@@ -15,30 +14,6 @@ options = st.multiselect(
     ["Yellow", "Red"])
 
 st.write("You selected:", options)
-
-# popup - modal
-modal = Modal(
-    "Demo popup",
-    key = "demo-modal",
-
-    #optional
-    padding = 20,
-    max_width=744
-    )
-
-open_popup = st.button("Select Location")
-
-if open_popup:
-    modal.open()
-
-if modal.is_open():
-    with modal.container():
-        st.write("text goes here")
-
-        st.write("some fancy text")
-        value = st.checkbox("check me")
-        st.write(f"checkbox checked {value}")
-
 
 
 @st.experimental_dialog("Select your Location")
