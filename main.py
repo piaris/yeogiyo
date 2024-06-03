@@ -115,7 +115,7 @@ with st.sidebar:
                 "3. Run\n"
                 "---")
     
-    st.link_button("서울시 도시 데이터 바로가기", "https://data.seoul.go.kr/SeoulRtd/")
+    # st.link_button("서울시 도시 데이터 바로가기", "https://data.seoul.go.kr/SeoulRtd/")
     @st.experimental_dialog("about seoul city data")
     def show_dialog():
         st.write("inside the dialog")
