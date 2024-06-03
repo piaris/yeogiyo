@@ -63,4 +63,4 @@ urllib3==1.26.14
 validators==0.20.0
 watchdog==2.2.1
 zipp==3.11.0
-streamlit_extras
+streamlit_extras==0.4.3
