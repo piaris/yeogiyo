@@ -51,7 +51,6 @@ smmap==5.0.0
 soupsieve==2.3.2.post1
 streamlit==1.17.0
 streamlit-modal==0.1.2
-streamlit-extras==0.4.3
 tenacity==8.1.0
 toml==0.10.2
 toolz==0.12.0
