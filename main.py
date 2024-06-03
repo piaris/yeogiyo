@@ -69,7 +69,6 @@ with web_header:
 with st.sidebar:
     
 
-    @st.experimental_dialog("Select your area")
     def ppltn_area():
         ppltn = st.radio("Select one area:", area_list)
         if st.button('select'):
