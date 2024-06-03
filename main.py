@@ -18,7 +18,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from streamlit_modal import Modal
 from streamlit_extras import buy_me_a_coffee
-from streamlit_extras import buy_me_a_coffee
 from datetime import time
 import requests
 import json
