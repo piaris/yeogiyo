@@ -47,7 +47,7 @@ area_list = df['AREA_NM']
 # 한글폰트 설정
 from matplotlib import font_manager as fm
 
-fpath = os.path.join(os.getcwd(), "Fonts\GmarketSansTTFBold.ttf") 
+fpath = os.path.join(os.getcwd(), "Fonts/GmarketSansTTFBold.ttf") 
 prop = fm.FontProperties(fname=fpath)
 #print(plt.rcParams['font.family'])
 #plt.rcParams['font.family'] = "NanumGothic"
@@ -116,7 +116,7 @@ with st.sidebar:
                 "---")
     
     # st.link_button("서울시 도시 데이터 바로가기", "https://data.seoul.go.kr/SeoulRtd/")
-    @st.experimental_dialog("about seoul city data")
+    # @st.experimental_dialog("about seoul city data")
     def show_dialog():
         st.write("inside the dialog")
         if st.button("close"):
@@ -142,9 +142,9 @@ with st.sidebar:
 
 # 2. 날짜 & 시간 선택 객체 저장 필요
 select_date = st.date_input("When is your date", value=None)
-select_time = st.time_input("Select your time", value=None, step=3600)
+# select_time = st.time_input("Select your time", value=None, step=3600)
 #time = st.time_input("What time do you meet", value=None, step=None)
-st.write("당신의 약속시간은: ", select_date, select_time)
+# st.write("당신의 약속시간은: ", select_date, select_time)
 #st.write("Your meeting time is:", time)
 
 # 3. 3개 탭 생성
@@ -154,7 +154,7 @@ tab1, tab2, tab3 = st.tabs(['area1', 'area2', 'area3'])
 with tab1:
     st.subheader("약속장소를 1개 선택해주세요")
 
-    @st.experimental_dialog("select your area")
+    # @st.experimental_dialog("select your area")
     def select_area(item):
         places=city_df[city_df['CATEGORY']==item]['AREA_SEARCH'].values
         area = st.radio("한 지역을 선택하세요", places)
@@ -203,7 +203,7 @@ with tab1:
     st.pyplot(fig)
 
     #container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
-    container2 = st.container(border=True)
+    container2 = st.container()
     container2.subheader("This is Hot keyword in area")
     #to do : 텍스트 리스트 받아서 naver_keyword라는 객체에 저장, 버튼 포문 돌려서 하나씩 링크버튼 생성
 
