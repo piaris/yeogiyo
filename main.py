@@ -23,23 +23,32 @@ from pandas import json_normalize
 
 import streamlit as st
 
+conn = st.connection("final_project",type="sql")
+df = conn.query("select * from Seoulcity")
+#st.dataframe(df)
+
+city_df = df[['CATEGORY', 'AREA_SEARCH']]
+st.dataframe(city_df)
+category = city_df['CATEGORY'].unique()
+area_list = df['AREA_NM']
+st.text(category)
 
 
 # Sql database conncet
 # @st.cache
 # def read_sqldata():
 #     conn = st.connection('mysql', type='sql')
-#     naver_df = conn.query("select * from project", ttl=3600)
+#     naver_df = conn.query("select * from final_project", ttl=3600)
 #     return naver_df
 # data = read_sqldata()
 
 
 # 테스트 데이터 가져오기
-df = pd.read_csv("Data\서울시115장소명 목록_장소명수정_20240527.csv", encoding='cp949')
-city_df = df[['CATEGORY', 'AREA_SEARCH']]
-#st.dataframe(city_df)
-category = city_df['CATEGORY'].unique()
-area_list = df['AREA_NM']
+# df = pd.read_csv("Data\서울시115장소명 목록_장소명수정_20240527.csv", encoding='cp949')
+# city_df = df[['CATEGORY', 'AREA_SEARCH']]
+# #st.dataframe(city_df)
+# category = city_df['CATEGORY'].unique()
+# area_list = df['AREA_NM']
 #st.text(category)
 
 # 기본 설정
