@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from streamlit_modal import Modal
+from streamlit_extras import buy_me_a_coffee
 from datetime import time
 import requests
 import json
@@ -25,6 +26,7 @@ from pandas import json_normalize
 import streamlit as st
 import os
 
+b = buy_me_a_coffee.button("a", floating=True)
 
 # Sql database conncet
 # @st.cache
