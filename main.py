@@ -16,22 +16,26 @@ import warnings
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import font_manager as fm
 from datetime import time
-import requests
-import json
-from pandas import json_normalize
-
 import streamlit as st
+import requests
+import xml.etree.ElementTree as ET
+import apidata as api
+
+
 
 conn = st.connection("final_project",type="sql")
-df = conn.query("select * from Seoulcity")
-#st.dataframe(df)
+df_seoulcity = conn.query("select * from Seoulcity")
+df_predict = conn.query("select * from Predict")
+st.dataframe(df_predict)
 
-city_df = df[['CATEGORY', 'AREA_SEARCH']]
-st.dataframe(city_df)
+
+city_df = df_seoulcity[['CATEGORY', 'AREA_SEARCH']]
+# st.dataframe(city_df)
 category = city_df['CATEGORY'].unique()
-area_list = df['AREA_NM']
-st.text(category)
+area_list = df_seoulcity['AREA_NM']
+# st.text(category)
 
 
 # Sql database conncet
@@ -53,70 +57,29 @@ st.text(category)
 
 # 기본 설정
 # 한글폰트 설정
-from matplotlib import font_manager as fm
-
-fpath = os.path.join(os.getcwd(), "Fonts\GmarketSansTTFBold.ttf") 
-prop = fm.FontProperties(fname=fpath)
 #print(plt.rcParams['font.family'])
-#plt.rcParams['font.family'] = "NanumGothic"
+plt.rcParams['font.family'] = "NanumGothic"
 plt.rcParams['axes.unicode_minus'] = False
 
+# 그래프 안의 한글폰트 설정
+fpath = os.path.join(os.getcwd(), "Fonts\GmarketSansTTFBold.ttf") 
+prop = fm.FontProperties(fname=fpath)
 
 web_header = st.container()
 
 # 1. 타이틀/로고 삽입
 
+
+
 with web_header:
-    st.title('YEOGIYO :sunglasses:')
-    
+    st.header('YEOGIYO :sunglasses:', divider='rainbow')
 
-
-
-
+apidata = api.SeoulData("강남역")
+df_ppltn = apidata.seoul_ppltn()
+st.dataframe(df_ppltn)
 
 with st.sidebar:
     
-
-    @st.experimental_dialog("Select your area")
-    def ppltn_area():
-        ppltn = st.radio("Select one area:", area_list)
-        if st.button('select'):
-            st.session_state.ppltn_area = {"ppltn": ppltn}
-            st.rerun()
-
-    input_area = ""
-    if "ppltn_area" not in st.session_state:
-        if st.button("실시간 혼잡도 보기"):
-            ppltn_area()
-
-    else:
-        f"You selected {st.session_state.ppltn_area['ppltn']}"
-        input_area = st.session_state.ppltn_area['ppltn']
-
-        # 서울시 도시 데이터 실시간 데이터 가져오기
-        url = "http://openapi.seoul.go.kr:8088/544259516c626f673332707066656a/json/citydata_ppltn/1/5/" + input_area
-        res = requests.get(url)
-        data = res.json()
-
-        # 인구 데이터 부분을 데이터프레임으로 변환
-        ppltn_data = json_normalize(data['SeoulRtd.citydata_ppltn'])
-        #st.text(ppltn_data)
-        # 예측 인구 데이터 부분을 데이터프레임으로 변환
-        fcst_data = json_normalize(data['SeoulRtd.citydata_ppltn'][0]['FCST_PPLTN'])
-        bar_data = fcst_data[['FCST_TIME', 'FCST_PPLTN_MAX']]
-
-        #st.dataframe(ppltn_data)
-        #st.dataframe(fcst_data)
-        st.bar_chart(bar_data, x='FCST_TIME', y='FCST_PPLTN_MAX')
-
-        st.divider()
-        st.info(ppltn_data["AREA_CONGEST_MSG"])
-
-
-    
-
-
-
 
     st.markdown("## How to use\n"
                 "1. Select Date and Time\n"
@@ -138,22 +101,29 @@ with st.sidebar:
     
     
     
+AREA_CONGEST_LVL = '혼잡'
+AREA_CONGEST_MSG = '''사람이 몰려있을 수 있지만 크게 붐비지는 않아요. 도보 이동에 큰 제약이 없어요.'''
+AREA_PPLTN_MIN = '23000'
+AREA_PPLTN_MAX = '25000'
 
 
 
 
 
 
+#new_title = '<b style="font-family:serif; color:#8675FF; font-size: 40px;">📋 서울에서 혼잡한 곳이 어디요</b>'
+#st.markdown(new_title, unsafe_allow_html=True)
+st.info("➡️ 1. 원하는 날짜와 시간을 선택하세요")
 
 
 
 
 
 # 2. 날짜 & 시간 선택 객체 저장 필요
-select_date = st.date_input("When is your date", value=None)
-select_time = st.time_input("Select your time", value=None, step=3600)
+selected_date = st.date_input("When is your date", value="today")
+selected_time = st.time_input("Select your time", value="now", step=3600)
 #time = st.time_input("What time do you meet", value=None, step=None)
-st.write("당신의 약속시간은: ", select_date, select_time)
+st.write("당신의 약속시간은: ", selected_date, selected_time)
 #st.write("Your meeting time is:", time)
 
 # 3. 3개 탭 생성
@@ -161,7 +131,8 @@ tab1, tab2, tab3 = st.tabs(['area1', 'area2', 'area3'])
 
 # in tab 1)약속장소 1개 선택 
 with tab1:
-    st.subheader("약속장소를 1개 선택해주세요")
+    st.info("➡️ 2. 아래 카테고리에서 원하는 장소 1개 선택하세요")
+
 
     @st.experimental_dialog("select your area")
     def select_area(item):
@@ -180,19 +151,28 @@ with tab1:
                     select_area(value)
 
     else:
-        f"당신은 {st.session_state.select_area['item']} {st.session_state.select_area['area']}을 선택했습니다"
+        selected_area = st.session_state.select_area['area']
+        f"당신은 {st.session_state.select_area['item']} {selected_area}을 선택했습니다"
 
 
-    container1 = st.container()
-    container1.write("혼잡도 그래프 + 혼잡도 분석 페이지 링크")
+    default_area = "강남역"
+    default_category = "인구밀집지역"
 
-    # 데이터 정의
+
+
+    # 모델 데이터 정의
+    # predict_selected = 
+    # predict_default =  
+    
+
+    # 파이차트 데이터 정의
     size = 0.3
     labels = '10th', '20th', '30th', '40th', '50th', '60th', '70th'
     ratio = [15, 30, 30, 10, 5, 5, 5]
     colors = ['#8675FF','#FD7289','#FF9A3E','#353E6C', '#16DBCC', '#DCFAF8', '#FFBB38']
     explode = (0, 0, 0, 0, 0, 0, 0)
     wedgeprops = {'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
+
 
 
     #도넛 차트 그리기
@@ -205,11 +185,23 @@ with tab1:
     #가운데에 텍스트 추가
     center_circle = plt.Circle((0, 0), 0.3, fc='white')
     fig.gca().add_artist(center_circle)
-    ax.text(0,0,'88%', ha='center', va='center', fontsize=32)
     ax.axis('equal') # 파이차트를 원형으로 유지
     ax.set_title("혼잡도 현황", fontproperties=prop)
+    
+    if select_area:
+        default_area = select_area
+        ax.text(0,0,df_predict['PREDICT'][0], ha='center', va='center', fontsize=32)
+    # if selected_area == null:
+    #     ax.text(0,0,df_predict['PREDICT'][0], ha='center', va='center', fontsize=32)
+    # else:
+
 
     st.pyplot(fig)
+    col1, col2, col3 = st.columns(3)
+    with col2:
+        st.header(AREA_CONGEST_LVL,divider='rainbow')
+    st.write(AREA_CONGEST_MSG)
+
 
     #container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
     container2 = st.container(border=True)
