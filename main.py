@@ -16,17 +16,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import font_manager as fm
-from datetime import time
 import streamlit as st
 import xml.etree.ElementTree as ET
 import sqldata as sqldata
-from io import StringIO
-import json
 import requests
-from statistics import mean
+import apidata as apidata
+from datetime import datetime, timedelta, date
+import naverpage as naver
 
 # sql에서 데이터 불러오기
 realtime_df = sqldata.sql_realtime()
+naver_df = sqldata.sql_naver()
 # st.dataframe(realtime_df)
 category = realtime_df['CATEGORY'].unique()
 area_list = realtime_df['AREA_NM']
@@ -105,51 +105,8 @@ class SeoulData():
 
 
 
-# 사이드바에서 사용할 실시간 혼잡도 순위 가져오기
-@st.cache_data
-def get_congestArea_data() :
-    url = "https://data.seoul.go.kr/SeoulRtd/getCategoryList?page=1&category=%EC%A0%84%EC%B2%B4%EB%B3%B4%EA%B8%B0&count=15&sort=true"
-    header = {
-    "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-    "referer" : "https://data.seoul.go.kr/SeoulRtd/list"
-    }
 
-    congest_area = []
 
-    try :
-        response = requests.get(url, headers=header)
-        response_data = json.loads(response.text)
-        congest_data=response_data['row'][:5]
-        for data in congest_data:
-            congest_lv = data['area_congest_lvl']
-            area = data['area_nm']
-            if congest_lv == '붐빔' :
-                congest_area.append(area)
-    except Exception as e:
-        print(e)
-
-    return congest_area
-
-@st.cache_data
-def get_congestRoad_data():
-    area_list = get_congestArea_data()
-    header = {
-        "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-    }
-    result = []
-    try:
-        for area_nm in area_list:
-            road_url = f"https://data.seoul.go.kr/SeoulRtd/road?hotspotNm={area_nm}"
-            response = requests.get(road_url, headers=header)
-            response_data = json.loads(response.text)['row']
-            spd_values = [float(item['SPD']) for item in response_data if 'SPD' in item]
-            avg_spd = round(mean(spd_values), 1)
-            result.append({area_nm: avg_spd})
-        return result
-    except requests.exceptions.RequestException as e:
-        print(f"HTTP 요청 오류: {e}")
-    except json.JSONDecodeError as e:
-        print(f"JSON 디코딩 오류: {e}")
 
 # 1. 기본 설정
 # 한글폰트 설정
@@ -163,8 +120,11 @@ prop = fm.FontProperties(fname=fpath)
 
 # 2. 화면 default값 설정
 
-apidata = SeoulData("강남역")
-df_ppltn = apidata.seoul_ppltn()
+default_area = "강남역"
+default_category = "인구밀집지역"
+
+api_default = SeoulData(default_area)
+df_ppltn = api_default.seoul_ppltn()
 # st.dataframe(df_ppltn)
 
 # 3. 타이틀/로고 삽입
@@ -172,9 +132,9 @@ web_header = st.container()
 
 with web_header:
 
-    st.image('Gallery\YEOGIYO__logobig.png', width=200)
+    st.image('Gallery\YEOGIYO__logobig.png', width=600)
 
-    st.header('서울에서 혼잡한 곳은 어디요! :sunglasses:', divider='rainbow')
+    st.header('서울에서 혼잡한 곳은 여기요! :sunglasses:', divider='rainbow')
 
 
 # 4. 사이드바 구성
@@ -185,23 +145,23 @@ with st.sidebar:
 
     st.title("Welcome 👋 Yeogiyo")
     
-    st.subheader("지금 가장 바쁜 곳은?")
-    st.text(get_congestArea_data())
+    st.subheader(":car:지금 가장 바쁜 곳은?")
+    st.write(apidata.print_congestArea())
 
-    st.subheader("지금 가장 막히는 곳은?")
-    st.text(get_congestRoad_data())
+    st.subheader(":people_holding_hands:지금 가장 막히는 곳은?")
+    st.write(apidata.print_congestRoad())
 
     # 경계선 & 아래 깃박스 색깔
     st.markdown("""<hr style="height:5px;border:none;color:#8675FF;background-color:#8675FF;" /> """, unsafe_allow_html=True)
 
-    st.info(
-        """## How to use\n"
-                "1. Select Date and Time\n"
-                "2. Select location\n"
-                "3. Run\n"
-                "---"
-        """
-        )
+    # st.info(
+    #     """## How to use\n"
+    #             "1. Select Date and Time\n"
+    #             "2. Select location\n"
+    #             "3. Run\n"
+    #             "---"
+    #     """
+    #     )
     
 
     st.link_button("서울시 도시 데이터 바로가기", "https://data.seoul.go.kr/SeoulRtd/")
@@ -228,10 +188,10 @@ AREA_PPLTN_MAX = '25000'
 tab1, tab2, tab3 = st.tabs(['area1', 'area2', 'area3'])
 with tab1:
     # 5-1 default 결과값 설정
-    default_area = "강남역"
-    default_category = "인구밀집지역"
 
-    # 5-2 약속장소 1개 선택
+
+
+    # 5.1 약속장소 1개 선택
     st.info("➡️ 1. 아래 카테고리에서 원하는 장소 1개 선택하세요")
     # 팝업 기능
     @st.experimental_dialog("select your area")
@@ -263,30 +223,24 @@ with tab1:
 
 
     # 파이차트 임시 데이터 정의
-    size = 0.3
-    labels = ['10대', '20대', '30대', '40대', '50대', '60대', '70대']
+    labels = '10대', '20대', '30대', '40대', '50대', '60대', '70대'
     ratio = [15, 30, 30, 10, 5, 5, 5]
     colors = ['#8675FF','#FD7289','#FF9A3E','#353E6C', '#16DBCC', '#DCFAF8', '#FFBB38']
     explode = (0, 0, 0, 0, 0, 0, 0)
     wedgeprops = {'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
 
     # 5-3  파이차트 그리기
-    col1, col2, col3 = st.columns([0.1, 0.8, 0.1])
-    with col2:
-        if st.button("혼잡도 자세히 보기"):
-            st.switch_page("pages/congest_show.py")
 
-    #도넛 차트 그리기
     fig, ax = plt.subplots()
-    ax.pie(ratio, colors=colors, counterclock=False, wedgeprops=dict(width=0.6),
+    ax.pie(ratio, colors=colors, labels=labels, counterclock=False, wedgeprops=dict(width=0.6),
         explode=explode, shadow=False, startangle=90, 
-        autopct='%.1f%%', textprops=dict(color="w"), labels=labels, labeldistance=2) #,  wedgeprops=wedgeprops,autopct=(labels, ratio)
+        autopct='%.1f%%') #,  wedgeprops=wedgeprops,autopct=(labels, ratio), textprops=dict(color="w")
 
     #가운데에 텍스트 추가
     center_circle = plt.Circle((0, 0), 0.3, fc='white')
     fig.gca().add_artist(center_circle)
     ax.axis('equal') # 파이차트를 원형으로 유지
-    ax.set_title("혼잡도 현황", fontproperties=prop)
+    # ax.set_title("혼잡도 현황", fontproperties=prop)
     
     
     if select_area:
@@ -302,33 +256,62 @@ with tab1:
 
     st.pyplot(fig)
 
-    st.write(AREA_CONGEST_MSG)
+
+    #6. 혼잡도 자세히 보기 -> congest_show페이지로 이동
+    #7. (완) 이미지로 저장하기
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("혼잡도 자세히 보기"):
+            st.switch_page("pages/congest_show.py")
+
+    with col2:
+        with open("result/kid.jpg", "rb") as file:
+
+            btn = st.download_button(
+                label="이미지로 저장하기",
+                data=file,
+                file_name="area1.png",
+                mime="image/png",
+                )
 
 
+    # 8. (작업중) 네이버 키워드 출력/링크 연결
     #container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
     container2 = st.container(border=True)
     container2.subheader("This is Hot keyword in area")
     #to do : 텍스트 리스트 받아서 naver_keyword라는 객체에 저장, 버튼 포문 돌려서 하나씩 링크버튼 생성
 
-    with container2:
-        naver_keyword = ["keyword1", "keyword2", "keyword3", "keyword4","keyword5"]
-        naver_url = ["https://www.naver.com", "https://www.naver.com", "https://www.naver.com", "https://www.naver.com","https://www.naver.com"]
-        cols = st.columns(5)
 
-        for col, keyword in zip(cols, naver_keyword):
-            col.button(keyword)
+    def on_word_click(location, keywords):
+        start_date, end_date = naver.set_datetime()
+        url =f"https://section.blog.naver.com/Search/Post.naver?pageNo=1&rangeType=WEEK&orderBy=sim&startDate={start_date}&endDate={end_date}&keyword={location}{keyword}"
+        return f'<a href="{url}" target="_blank">{keyword}</a>'
+
+
+    with container2:
+        location='남대문시장'
+        start_date, end_date = naver.set_datetime()
+        keywords_df = naver_df[naver_df['AREA_NM'] == select_area]
+        keywords = list(keywords_df['HASHTAG'])
+        # st.text(keywords)
+        cols = st.columns(20)
+        for col, keyword in zip(cols, keywords):
+            naver_link = on_word_click(location=location, keywords=keyword)
+            col.link_button(keyword, naver_link)
 
         #container2.write("This will show last")
-
-
-    #대신 어디 갈까
+        # 클릭 가능한 링크 표시 
+        # '강남역', '맛집' 부분에 parmeter 받아온 거 들어가게 넣어주면 됨
+        # st.markdown(on_word_click('강남역','맛집'), unsafe_allow_html=True)
+    
+    # 9 대신 어디 갈까
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.metric(label="대신 어디 갈까?", value = "station", delta="-5%")
     
-    #대신 언제 갈까
+    # 10 대신 언제 갈까
     with col2:
         st.metric(label="대신 언제 갈까?", value = "date", delta="-10%")
 
@@ -339,14 +322,6 @@ with tab1:
 
 
 
-    with open("result/kid.jpg", "rb") as file:
-
-        btn = st.download_button(
-            label="Download data as jpg",
-            data=file,
-            file_name="area1.png",
-            mime="image/png",
-            )
 
 
 
