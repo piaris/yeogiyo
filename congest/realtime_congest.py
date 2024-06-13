@@ -1,8 +1,10 @@
 from io import StringIO
+import re
 import json
 import requests
-from statistics import mean
 import streamlit as st
+from statistics import median
+from statistics import mean
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -60,7 +62,7 @@ def get_congestRoad_data():
 
 
 
-# 추가 ========================================================================================================================== 
+# 추가 ==========================================================================================================================
 # 여기서부터는 병렬 처리할 경우 사용되는 code
 # 평균 주행 속도 구하기
 def fetch_avg_spd(area_nm):
@@ -105,3 +107,64 @@ def print_congestRoad():
     for result in results:
         for key, value in result.items():
             st.write(f"{key} : {value} km/h")
+
+
+
+
+
+
+
+
+#  congest MSG 가져오는 함수들 ==========================================================================================================================
+# congest data 가져오기
+def fetch_data(area_nm):
+    url = f"https://data.seoul.go.kr/SeoulRtd/pop_congest?hotspotNm={area_nm}"
+    header = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    }
+    try:
+        response = requests.get(url, headers=header)
+        if response.status_code == 200:
+            data = response.json()[0]
+            return data
+        else:
+            st.error(f"Failed to fetch data. Status code: {response.status_code}")
+            return None
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        return None
+
+
+
+
+# 12시간 이전 메세지
+def get_brfore_msg(area_nm) :
+    data = fetch_data(area_nm)
+    if data:
+        response_data = data.get('before_instruction', '')
+        focs_msg = re.sub(r'<.*?>', '', response_data)
+        return focs_msg
+    return None
+
+
+
+# 12시간 이후 메세지
+def get_focs_msg(area_nm) :
+    data = fetch_data(area_nm)
+    if data:
+        response_data = data.get('predict_instruction', '')
+        focs_msg = re.sub(r'<.*?>', '', response_data)
+        return focs_msg
+    return None
+
+
+
+def get_people_interval(area_nm) :
+    data = fetch_data(area_nm)
+    if data:
+        response_data = data.get('people_interval', '')
+        clean_res_data = re.sub(r'[\/명]', '', response_data)
+        people_interval = [value.split('~') for value in clean_res_data.split('|')]
+        result = [int(median([float(v) for v in value])) for value in people_interval]
+        return result
+    return None
