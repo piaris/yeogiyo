@@ -23,6 +23,7 @@ import requests
 import apidata as apidata
 from datetime import datetime, timedelta, date
 import naverpage as naver
+from googletrans import Translator
 
 st.set_page_config(
     page_title="The most crowded area in Seoul! :sunglasses:",
@@ -30,12 +31,14 @@ st.set_page_config(
     layout="centered"
 )
 
+
+
 # sql에서 데이터 불러오기
 realtime_df = sqldata.sql_realtime()
 naver_df = sqldata.sql_naver()
 # st.dataframe(realtime_df)
-category = realtime_df['CATEGORY'].unique()
-area_list = realtime_df['AREA_NM']
+category = realtime_df['CATEGORY_ENG'].unique()
+area_list = realtime_df['ENG_NM']
 # st.text(category)
 
 
@@ -110,10 +113,6 @@ class SeoulData():
         return df_fcst
 
 
-
-
-
-
 # 1. 기본 설정
 # 한글폰트 설정
 #print(plt.rcParams['font.family'])
@@ -124,14 +123,7 @@ plt.rcParams['axes.unicode_minus'] = False
 fpath = os.path.join(os.getcwd(), "Fonts\GmarketSansTTFBold.ttf") 
 prop = fm.FontProperties(fname=fpath)
 
-# 2. 화면 default값 설정
 
-default_area = "강남역"
-default_category = "인구밀집지역"
-
-api_default = SeoulData(default_area)
-df_ppltn = api_default.seoul_ppltn()
-# st.dataframe(df_ppltn)
 
 # 3. 타이틀/로고 삽입
 
@@ -161,15 +153,6 @@ with st.sidebar:
 
     # 경계선 & 아래 깃박스 색깔
     st.markdown("""<hr style="height:5px;border:none;color:#8675FF;background-color:#8675FF;" /> """, unsafe_allow_html=True)
-
-    # st.info(
-    #     """## How to use\n"
-    #             "1. Select Date and Time\n"
-    #             "2. Select location\n"
-    #             "3. Run\n"
-    #             "---"
-    #     """
-    #     )
     
 
     st.link_button("go to Seoul City data", "https://data.seoul.go.kr/SeoulRtd/")
@@ -195,22 +178,19 @@ AREA_PPLTN_MAX = '25000'
 # 5. 메인 서비스 3개 탭 생성
 tab1, tab2, tab3 = st.tabs(['area1', 'area2', 'area3'])
 with tab1:
-    # 5-1 default 결과값 설정
-
-
 
     # 5.1 약속장소 1개 선택
     st.info("➡️ 1. Select location from the categories below")
     # 팝업 기능
     @st.experimental_dialog("select your area")
     def select_area(item):
-        places=realtime_df[realtime_df['CATEGORY']==item]['AREA_SEARCH'].values
+        places=realtime_df[realtime_df['CATEGORY_ENG']==item]['ENG_NM'].values
         area = st.radio("Select one location", places)
         if st.button("select"):
             st.session_state.select_area = {"item": item, "area": area}
             st.rerun()
 
-    cols = st.columns(5)
+    cols = st.columns([0.2,0.2,0.15,0.1,0.2])
     if "select_area" not in st.session_state:
         for col, value in zip(cols, category):
             with col:
@@ -219,7 +199,7 @@ with tab1:
 
     else:
         selected_area = st.session_state.select_area['area']
-        f"You selected {selected_area} in {st.session_state.select_area['item']} 을 선택했습니다"
+        f"You selected {selected_area} in {st.session_state.select_area['item']}."
 
 
     # 5-2 약속장소 1개 선택
@@ -228,6 +208,20 @@ with tab1:
     selected_time = st.time_input("Select your time", value="now", step=3600)
     st.write("Your appointment is: ", selected_date, selected_time)
 
+    # 5.2 화면 default값 설정/출력
+
+    default_area = "강남역"
+    default_category = "인구밀집지역"
+
+    before_msg = apidata.get_brfore_msg(default_area)
+    default_msg1 = st.text_area('Before 12 hours :balloon:', before_msg)
+
+    focs_msg = apidata.get_focs_msg(default_area)
+    default_msg2 = st.text_area('Next 12 hours', focs_msg)
+
+    api_default = SeoulData(default_area)
+    df_ppltn = api_default.seoul_ppltn()
+    # st.dataframe(df_ppltn)
 
     # 파이차트 임시 데이터 정의
     labels = '10th', '20th', '30th', '40th', '50th', '60th', '70th'
@@ -253,15 +247,13 @@ with tab1:
     if select_area:
         default_area = select_area
         predict_df = sqldata.sql_predict()
-        congest_result = predict_df['PREDICT'][0]
+        congest_result = predict_df['PERCENTAGE'][0]
         ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
         
-        
-    # if selected_area == null:
-    #     ax.text(0,0,df_predict['PREDICT'][0], ha='center', va='center', fontsize=32)
-    # else:
 
     st.pyplot(fig)
+
+
 
 
     #6. 혼잡도 자세히 보기 -> congest_show페이지로 이동
@@ -280,6 +272,8 @@ with tab1:
                 file_name="area1.png",
                 mime="image/png",
                 )
+            
+
 
 
     # 8. (작업중) 네이버 키워드 출력/링크 연결
@@ -292,18 +286,20 @@ with tab1:
     def on_word_click(location, keywords):
         start_date, end_date = naver.set_datetime()
         url =f"https://section.blog.naver.com/Search/Post.naver?pageNo=1&rangeType=WEEK&orderBy=sim&startDate={start_date}&endDate={end_date}&keyword={location}{keyword}"
-        return f'<a href="{url}" target="_blank">{keyword}</a>'
+        return url
+    #f'<a href="{url}" target="_blank">{keyword}</a>'
 
 
     with container2:
-        location='남대문시장'
+        area_temp = "강남역"
         start_date, end_date = naver.set_datetime()
-        keywords_df = naver_df[naver_df['AREA_NM'] == select_area]
+        keywords_df = naver_df[naver_df['AREA_NM'] == area_temp]
         keywords = list(keywords_df['HASHTAG'])
-        # st.text(keywords)
+        st.text(keywords)
         cols = st.columns(20)
         for col, keyword in zip(cols, keywords):
-            naver_link = on_word_click(location=location, keywords=keyword)
+            naver_link = on_word_click(location=area_temp, keywords=keyword)
+            #st.text(naver_link)
             col.link_button(keyword, naver_link)
 
         #container2.write("This will show last")

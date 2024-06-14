@@ -30,7 +30,7 @@
 
 ## 🧊 기술스택
 
-[🙋‍♂️ 스택 사용 스토리](https://github.com/piaris)
+[🙋‍♂️ 스택 사용 스토리](READSTACK.md)
 
 ```bash
 **프론트/백엔드** : Pandas, Streamlit, matplotlib
@@ -43,7 +43,7 @@
 
 ## 🧊 오류/문제 해결
 
-[🙋‍♂️ 문제 해결 스토리](https://github.com/piaris)
+[🙋‍♂️ 문제 해결 스토리](READERROR.md)
 
 ## 📶 데이터파이프라인
 

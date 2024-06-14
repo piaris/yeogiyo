@@ -12,6 +12,13 @@ import json
 from statistics import mean
 from statistics import median
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from googletrans import Translator
+
+#텍스트 번역
+def traslate_product(msg):
+    translator = Translator()
+    msg_eng = translator.translate(msg, dest='en').text
+    return msg_eng
 
 # 사이드바에서 사용할 실시간 혼잡도 순위 가져오기
 def get_congestArea_data() :
@@ -40,7 +47,8 @@ def get_congestArea_data() :
 # '붐빔'지역의 'area_nm' 출력
 def print_congestArea() :
     for area in get_congestArea_data():
-        st.text(area)
+        eng = traslate_product(area)
+        st.text(eng)
 
 
 # '붐빔'지역의 도로교통 정보(평균 주행 속력) 출력
@@ -107,7 +115,8 @@ def print_congestRoad():
     results = get_congestRoad_data_parallel()
     for result in results:
         for key, value in result.items():
-            st.text(f"{key} : {value} km/h")
+            eng = traslate_product(key)
+            st.text(f"{eng} : {value} km/h")
 
 
 #  congest MSG 가져오는 함수들 ==========================================================================================================================
@@ -138,7 +147,8 @@ def get_brfore_msg(area_nm) :
     if data:
         response_data = data.get('before_instruction', '')
         focs_msg = re.sub(r'<.*?>', '', response_data)
-        return focs_msg
+        eng = traslate_product(focs_msg)
+        return eng
     return None
 
 # 12시간 이후 메세지
@@ -147,7 +157,8 @@ def get_focs_msg(area_nm) :
     if data:
         response_data = data.get('predict_instruction', '')
         focs_msg = re.sub(r'<.*?>', '', response_data)
-        return focs_msg
+        eng = traslate_product(focs_msg)
+        return eng
     return None
 
 
