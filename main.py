@@ -24,6 +24,12 @@ import apidata as apidata
 from datetime import datetime, timedelta, date
 import naverpage as naver
 
+st.set_page_config(
+    page_title="The most crowded area in Seoul! :sunglasses:",
+    page_icon="❤️‍🔥",
+    layout="centered"
+)
+
 # sql에서 데이터 불러오기
 realtime_df = sqldata.sql_realtime()
 naver_df = sqldata.sql_naver()
@@ -128,13 +134,15 @@ df_ppltn = api_default.seoul_ppltn()
 # st.dataframe(df_ppltn)
 
 # 3. 타이틀/로고 삽입
+
+
 web_header = st.container()
 
 with web_header:
 
     st.image('Gallery\YEOGIYO__logobig.png', width=600)
 
-    st.header('서울에서 혼잡한 곳은 여기요! :sunglasses:', divider='rainbow')
+    st.header('The most crowded area in Seoul! :sunglasses:', divider='rainbow')
 
 
 # 4. 사이드바 구성
@@ -145,10 +153,10 @@ with st.sidebar:
 
     st.title("Welcome 👋 Yeogiyo")
     
-    st.subheader(":car:지금 가장 바쁜 곳은?")
+    st.subheader(":car: The busiest place now?")
     st.write(apidata.print_congestArea())
 
-    st.subheader(":people_holding_hands:지금 가장 막히는 곳은?")
+    st.subheader(":people_holding_hands: The most congested place now?")
     st.write(apidata.print_congestRoad())
 
     # 경계선 & 아래 깃박스 색깔
@@ -164,14 +172,14 @@ with st.sidebar:
     #     )
     
 
-    st.link_button("서울시 도시 데이터 바로가기", "https://data.seoul.go.kr/SeoulRtd/")
+    st.link_button("go to Seoul City data", "https://data.seoul.go.kr/SeoulRtd/")
     @st.experimental_dialog("about seoul city data")
     def show_dialog():
         st.write("inside the dialog")
         if st.button("close"):
             st.rerun()
 
-    if st.button("서울시 도시 데이터란?"):
+    if st.button("about Seoul City Data"):
         show_dialog()
     
     st.warning("🚧️ This app is still in beta. Please [check the version](https://github.com/piaris/yeogiyo) in the GitHub repo.")
@@ -192,12 +200,12 @@ with tab1:
 
 
     # 5.1 약속장소 1개 선택
-    st.info("➡️ 1. 아래 카테고리에서 원하는 장소 1개 선택하세요")
+    st.info("➡️ 1. Select location from the categories below")
     # 팝업 기능
     @st.experimental_dialog("select your area")
     def select_area(item):
         places=realtime_df[realtime_df['CATEGORY']==item]['AREA_SEARCH'].values
-        area = st.radio("한 지역을 선택하세요", places)
+        area = st.radio("Select one location", places)
         if st.button("select"):
             st.session_state.select_area = {"item": item, "area": area}
             st.rerun()
@@ -211,19 +219,18 @@ with tab1:
 
     else:
         selected_area = st.session_state.select_area['area']
-        f"당신은 {st.session_state.select_area['item']} {selected_area}을 선택했습니다"
-
+        f"You selected {selected_area} in {st.session_state.select_area['item']} 을 선택했습니다"
 
 
     # 5-2 약속장소 1개 선택
-    st.info("➡️ 2. 원하는 날짜와 시간을 선택하세요")
+    st.info("➡️ 2. Select date and time of your appointment")
     selected_date = st.date_input("When is your date", value="today")
     selected_time = st.time_input("Select your time", value="now", step=3600)
-    st.write("당신의 약속시간은: ", selected_date, selected_time)
+    st.write("Your appointment is: ", selected_date, selected_time)
 
 
     # 파이차트 임시 데이터 정의
-    labels = '10대', '20대', '30대', '40대', '50대', '60대', '70대'
+    labels = '10th', '20th', '30th', '40th', '50th', '60th', '70th'
     ratio = [15, 30, 30, 10, 5, 5, 5]
     colors = ['#8675FF','#FD7289','#FF9A3E','#353E6C', '#16DBCC', '#DCFAF8', '#FFBB38']
     explode = (0, 0, 0, 0, 0, 0, 0)
@@ -261,14 +268,14 @@ with tab1:
     #7. (완) 이미지로 저장하기
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("혼잡도 자세히 보기"):
+        if st.button("Click for congestion details"):
             st.switch_page("pages/congest_show.py")
 
     with col2:
         with open("result/kid.jpg", "rb") as file:
 
             btn = st.download_button(
-                label="이미지로 저장하기",
+                label="Save the result as image",
                 data=file,
                 file_name="area1.png",
                 mime="image/png",
@@ -309,11 +316,11 @@ with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric(label="대신 어디 갈까?", value = "station", delta="-5%")
+        st.metric(label="Where should I go instead?", value = "station", delta="-5%")
     
     # 10 대신 언제 갈까
     with col2:
-        st.metric(label="대신 언제 갈까?", value = "date", delta="-10%")
+        st.metric(label="When should I go instead?", value = "date", delta="-10%")
 
 
 
