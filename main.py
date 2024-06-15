@@ -39,6 +39,7 @@ naver_df = sqldata.sql_naver()
 # st.dataframe(realtime_df)
 category = realtime_df['CATEGORY_ENG'].unique()
 area_list = realtime_df['ENG_NM']
+predict_df = sqldata.sql_predict()
 # st.text(category)
 
 
@@ -116,7 +117,7 @@ class SeoulData():
 # 1. 기본 설정
 # 한글폰트 설정
 #print(plt.rcParams['font.family'])
-plt.rcParams['font.family'] = "NanumGothic"
+plt.rcParams['font.family'] = "Malgun Gothic "
 plt.rcParams['axes.unicode_minus'] = False
 
 # 그래프 안의 한글폰트 설정
@@ -226,6 +227,19 @@ with tab1:
     # 파이차트 임시 데이터 정의
     labels = '10th', '20th', '30th', '40th', '50th', '60th', '70th'
     ratio = [15, 30, 30, 10, 5, 5, 5]
+    
+    # print(selected_area, selected_date, selected_time)
+    # print(predict_df.columns)
+    cond1 = predict_df["AREA_NM_ENG"]==selected_area
+    cond2 = predict_df["PPLTN_DATE"]==str(selected_date)
+    cond3 = predict_df["PPLTN_TIME"]==str(selected_time.hour).zfill(2)
+        
+    selected_df = predict_df[cond1 & cond2 & cond3] 
+    # print(selected_df)
+    if len(selected_df) == 0:
+        ratio = [1] * 7
+    else:
+        ratio = selected_df[selected_df.columns[selected_df.columns.str.contains("RATE_..")]].iloc[0]
     colors = [
         "#8675FF",
         "#FD7289",
@@ -254,8 +268,10 @@ with tab1:
     
     if select_area:
         default_area = select_area
-        predict_df = sqldata.sql_predict()
-        congest_result = predict_df['PERCENTAGE'][0]
+        if len(selected_df) == 0:
+            congest_result = "None"
+        else:
+            congest_result = selected_df['PERCENTAGE'].iloc[0]
         ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
         
 
