@@ -22,10 +22,23 @@ plt.rcParams['axes.unicode_minus'] = False
 # 5. api - 12시간 예측 바그래프
 # 6. api - 현재 연령 분포
 
-area_name = st.text_input('지역명을 입력하세요',)
+
+tmp = st.text_input('지역명을 입력하세요',)
+
+if tmp:
+    area_name = tmp
+
+else:
+    if st.session_state:
+        area_name = st.session_state["selected_area"]
+        congest_result = st.session_state["congest_result"]
+    else:
+        area_name = "강남역"
+        congest_result = "96%"
+
+
 
 # 혼잡도 예측 모델 임시 데이터
-congest_result = '88.8%'
 # congest_style = '<b style="font-family:serif; color:#8675FF; font-size: 60px;">📋congest_result </b>'
 
 
@@ -111,9 +124,8 @@ if data and area_name:
             }
         )
         st.dataframe(chart_data2)
-
         bar_plot = plt.barh(chart_data2.columns, chart_data2.iloc[0])
-        st.pyplot(bar_plot)
+        st.bar_chart(chart_data2.iloc[:,4:].T)
 # # 6. api - 현재 연령 분포
 
 

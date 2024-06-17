@@ -25,3 +25,9 @@ def sql_forecast():
     conn = st.connection("final_project",type="sql")
     data = conn.query("select * from Forecast")
     return data
+
+@st.cache_data
+def sql_seoulcity():
+    conn = st.connection("final_project",type="sql")
+    data = conn.query("select * from Seoulcity")
+    return data

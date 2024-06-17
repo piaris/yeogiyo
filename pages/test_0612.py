@@ -20,6 +20,7 @@ df_predict = conn.query("select * from Predict")
 plt.rcParams['font.family'] = "NanumGothic"
 plt.rcParams['axes.unicode_minus'] = False
 
+print(st.session_state)
 
 # css_file = "style.css"
 
@@ -35,8 +36,10 @@ AREA_PPLTN_MAX = '34000'
 
 
 # 1. default 강남 api값을 먼저 가져옴 default_ppltn
+if st.session_state:
+    AREA_NM = st.session_state["selected_area"]
 
-default_data = api.SeoulData("강남역")
+default_data = api.SeoulData(AREA_NM)
 default_ppltn = default_data.seoul_ppltn()
 default_ppltn['AREA_PPLTN_median'] = default_ppltn[['AREA_PPLTN_MIN', 'AREA_PPLTN_MAX']].mean(axis=1)
 st.dataframe(default_ppltn)
@@ -45,17 +48,20 @@ default_congest = default_ppltn['AREA_PPLTN_median']
 st.text(default_congest)
 
 # 2. 원하는 날짜와 시간을 선택하세요
-selected_date = '2024-06-04 11:00:00'
-selected_time = '11:00:00'
+selected_date = '2024-06-10 11:00:00'
+selected_time = '00:00:00'
 
+if st.session_state:
+    selected_date = st.session_state["selected_date"]
+    selected_time = str(st.session_state["selected_time"])+"00:00"
 # 3. 아래 카테고리에서 원하는 장소 1개 선택하세요, 워딩 포함만 되면 가져오기
-selected_area = '서울대입구역'
+selected_area = AREA_NM
 
 # 4. 검색 장소키워드가 들어간 데이터프레임을 만드는 함수?
-df_predict["PPLTN_TIME"] = pd.to_datetime(df_predict["PPLTN_TIME"])
+df_predict["PPLTN_TIME"] = pd.to_datetime(df_predict["PPLTN_DATE"]+" "+df_predict["PPLTN_TIME"]+":00")
 df_predict_area = df_predict[
-    (df_predict['AREA_NM'] == selected_area) &
-    (df_predict['PPLTN_TIME'] == selected_date)
+    (df_predict['AREA_NM'] == AREA_NM) &
+    (df_predict['PPLTN_TIME'].dt.time.map(str) == "11:00:00")
 ]
 st.dataframe(df_predict_area)
 st.text(df_predict_area['PREDICT'].values[0])

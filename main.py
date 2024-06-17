@@ -40,6 +40,7 @@ naver_df = sqldata.sql_naver()
 category = realtime_df['CATEGORY_ENG'].unique()
 area_list = realtime_df['ENG_NM']
 predict_df = sqldata.sql_predict()
+seoulcity_df = sqldata.sql_seoulcity()
 # st.text(category)
 
 
@@ -206,7 +207,7 @@ with tab1:
     # 5-2 약속장소 1개 선택
     st.info("➡️ 2. Select date and time of your appointment")
     selected_date = st.date_input("When is your date", value="today")
-    selected_time = st.time_input("Select your time", value="now", step=3600)
+    selected_time = st.time_input("Select your time", value="now", step=3600).hour
     st.write("Your appointment is: ", selected_date, selected_time)
 
     # 5.2 화면 default값 설정/출력
@@ -230,10 +231,22 @@ with tab1:
     
     # print(selected_area, selected_date, selected_time)
     # print(predict_df.columns)
+    try:
+        st.session_state["selected_area"] = seoulcity_df[seoulcity_df["ENG_NM"]==selected_area]["AREA_NM"].values[0]
+        st.session_state["selected_date"] = selected_date
+        st.session_state["selected_time"] = selected_time
+        
+    except:
+        selected_area = "Gangnam station"
+        selected_date = "2024-06-10"
+        selected_time = "00"
+        st.session_state["selected_area"] = seoulcity_df[seoulcity_df["ENG_NM"]==selected_area]["AREA_NM"].values[0]
+        st.session_state["selected_date"] = selected_date
+        st.session_state["selected_time"] = selected_time
+        
     cond1 = predict_df["AREA_NM_ENG"]==selected_area
     cond2 = predict_df["PPLTN_DATE"]==str(selected_date)
-    cond3 = predict_df["PPLTN_TIME"]==str(selected_time.hour).zfill(2)
-        
+    cond3 = predict_df["PPLTN_TIME"]==str(selected_time).zfill(2)
     selected_df = predict_df[cond1 & cond2 & cond3] 
     # print(selected_df)
     if len(selected_df) == 0:
@@ -272,6 +285,7 @@ with tab1:
             congest_result = "None"
         else:
             congest_result = selected_df['PERCENTAGE'].iloc[0]
+            st.session_state["congest_result"] = congest_result
         ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
         
 
@@ -282,6 +296,7 @@ with tab1:
 
     #6. 혼잡도 자세히 보기 -> congest_show페이지로 이동
     #7. (완) 이미지로 저장하기
+    
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Click for congestion details"):
