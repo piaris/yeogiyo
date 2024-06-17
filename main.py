@@ -36,6 +36,7 @@ st.set_page_config(
 # sql에서 데이터 불러오기
 realtime_df = sqldata.sql_realtime()
 naver_df = sqldata.sql_naver()
+predict_df = sqldata.sql_predict()
 # st.dataframe(realtime_df)
 category = realtime_df['CATEGORY_ENG'].unique()
 area_list = realtime_df['ENG_NM']
@@ -125,7 +126,7 @@ prop = fm.FontProperties(fname=fpath)
 
 
 
-# 3. 타이틀/로고 삽입
+# 2. 타이틀/로고 삽입
 
 
 web_header = st.container()
@@ -137,7 +138,7 @@ with web_header:
     st.header('The most crowded area in Seoul! :sunglasses:', divider='rainbow')
 
 
-# 4. 사이드바 구성
+# 3. 사이드바 구성
 
 with st.sidebar:
 
@@ -175,11 +176,10 @@ AREA_PPLTN_MIN = '23000'
 AREA_PPLTN_MAX = '25000'
 
 
-# 5. 메인 서비스 3개 탭 생성
+# 4. 메인 서비스 3개 탭 생성
 tab1, tab2, tab3 = st.tabs(['area1', 'area2', 'area3'])
 with tab1:
-
-    # 5.1 약속장소 1개 선택
+    # 5.1 (완) 원하는 카테고리/장소 선택
     st.info("➡️ 1. Select location from the categories below")
     # 팝업 기능
     @st.experimental_dialog("select your area")
@@ -208,10 +208,10 @@ with tab1:
     selected_time = st.time_input("Select your time", value="now", step=3600)
     st.write("Your appointment is: ", selected_date, selected_time)
 
-    # 5.2 화면 default값 설정/출력
+    # 5.3. 화면 default값 api 호출 설정/출
+    # 1) 화면 default값 api 호출, 메시지 & 바그래프 출력
 
     default_area = "강남역"
-    default_category = "인구밀집지역"
 
     before_msg = apidata.get_brfore_msg(default_area)
     default_msg1 = st.text_area('Before 12 hours :balloon:', before_msg)
@@ -219,18 +219,42 @@ with tab1:
     focs_msg = apidata.get_focs_msg(default_area)
     default_msg2 = st.text_area('Next 12 hours', focs_msg)
 
+    interval, datetime_interval = apidata.get_people_interval(default_area)
+    # st.dataframe(interval)
+    colors = ['#353E6C'] * 12 + ['#8675FF']*1 + ['#FD7289']*11
+
+    fig_bar = plt.figure(figsize=(10,4))
+    plt.bar(datetime_interval, interval, color=colors)
+    plt.xlabel("Time Flow")
+    plt.ylabel("People counts")
+    # plt.grid()
+    plt.xticks(rotation=45)
+    plt.yticks()
+    
+    st.pyplot(fig_bar)
+
+    # apidata로 24시간 과거/미래 바그래프 출력
+    # interval_df = pd.DataFrame(
+    #     {
+    #         "유동인구" : interval[:-1],
+    #         "일자/시간" : datetime_interval[:-1]
+    #     }
+    # )
+    # st.bar_chart(interval_df, x='일자/시간', y='유동인구', color="#8675FF")
+
     api_default = SeoulData(default_area)
     df_ppltn = api_default.seoul_ppltn()
     # st.dataframe(df_ppltn)
 
+
+
+    # 5.4 Predict table에서 혼잡도 가져와서 파이차트, 예상 혼잡도 출력
     # 파이차트 임시 데이터 정의
     labels = '10th', '20th', '30th', '40th', '50th', '60th', '70th'
     ratio = [15, 30, 30, 10, 5, 5, 5]
     colors = ['#8675FF','#FD7289','#FF9A3E','#353E6C', '#16DBCC', '#DCFAF8', '#FFBB38']
     explode = (0, 0, 0, 0, 0, 0, 0)
     wedgeprops = {'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
-
-    # 5-3  파이차트 그리기
 
     fig, ax = plt.subplots()
     ax.pie(ratio, colors=colors, labels=labels, counterclock=False, wedgeprops=dict(width=0.6),
@@ -246,7 +270,6 @@ with tab1:
     
     if select_area:
         default_area = select_area
-        predict_df = sqldata.sql_predict()
         congest_result = predict_df['PERCENTAGE'][0]
         ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
         
