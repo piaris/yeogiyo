@@ -20,11 +20,19 @@ st.dataframe(predict_df)
 # 1. 모델 - *2주간의 예측 바+선그래프
 # 2. 모델 - 추후 2주간의 예측 혼잡도 지수
 
-#임시 데이터 입력
-selected_area = "서울대입구역"
-selected_date = "2024-06-13"
-selected_time = "06"
+# selected_area = st.session_state.get('selected_area', )
 
+
+if st.session_state:
+    selected_area = st.session_state["selected_area"]
+    selected_date = st.session_state["selected_date"]
+    selected_time = st.session_state["selected_time"]
+
+else:
+    area = "강남역"
+
+st.text(selected_area)
+st.text(selected_date)
 
 def extract_congest(area):
     result = predict_df[(predict_df['AREA_NM'] == area)]
@@ -45,48 +53,32 @@ st.dataframe(predict_chart)
 
 st.divider()
 
-# # 5. api - 12시간 예측 바그래프
 
-# if selected_date and selected_time and selected_area:
 
-#     with st.container():
-#         st.subheader(selected_area, '의 2주간의 예측 인구 그래프')
-#         if predict_df['AREA_NM_ENG'] == selected_area:
-#             predict_df['PREDICT']
+if selected_date and selected_time and selected_area:
+    with st.container():
+        st.subheader(selected_area, '의 연령별/성별 분포 그래프')
 
-#         chart_data1 = pd.DataFrame(
-#             {
+        chart_data2 = pd.DataFrame(
+            {
+                "예측일자" : predict_df['PPLTN_DATE'],
+                "예측시간" : predict_df['PPLTN_TIME'],
+                "요일" : predict_df['DAY_NAME'],
+                "예상유동인구" : predict_df['PREDICT'],
+                "10대" : predict_df['PPLTN_RATE_10'],
+                "20대" : predict_df['PPLTN_RATE_20'],
+                "30대" : predict_df['PPLTN_RATE_30'],
+                "40대" : predict_df['PPLTN_RATE_40'],
+                "50대" : predict_df['PPLTN_RATE_50'],
+                "60대" : predict_df['PPLTN_RATE_60'],
+                "70대" : predict_df['PPLTN_RATE_70']
+            }
+        )
+        st.dataframe(chart_data2)
 
-#             "예측시간" : list(predict_df['FCST_TIME']),
-#             "유동인구(최소)" : predict_df['FCST_PPLTN_MIN'],
-#             "유동인구(최대)" : predict_df['FCST_PPLTN_MAX']
-#             }
-#         )
-
-#         st.bar_chart(chart_data1, x="예측시간", y=["유동인구(최소)", "유동인구(최대)"], color=['#8675FF','#FD7289'])
-
-#     with st.container():
-#         st.subheader(area_name, '의 연령별/성별 분포 그래프')
-
-#         chart_data2 = pd.DataFrame(
-#             {
-#                 "최대 유동인구" : df_ppltn['AREA_PPLTN_MAX'],
-#                 "최소 유동인구" : df_ppltn['AREA_PPLTN_MIN'],
-#                 "남성 비율" : df_ppltn['MALE_PPLTN_RATE'],
-#                 "여성 비율" : df_ppltn['FEMALE_PPLTN_RATE'],
-#                 "10대" : df_ppltn['PPLTN_RATE_10'],
-#                 "20대" : df_ppltn['PPLTN_RATE_20'],
-#                 "30대" : df_ppltn['PPLTN_RATE_30'],
-#                 "40대" : df_ppltn['PPLTN_RATE_40'],
-#                 "50대" : df_ppltn['PPLTN_RATE_50'],
-#                 "60대" : df_ppltn['PPLTN_RATE_60'],
-#                 "70대" : df_ppltn['PPLTN_RATE_70']
-#             }
-#         )
-#         st.dataframe(chart_data2)
-
-#         bar_plot = plt.barh(chart_data2.columns, chart_data2.iloc[0])
-#         st.pyplot(bar_plot)
+        bar_plot = plt.barh(chart_data2.columns, chart_data2.iloc[0])
+        st.pyplot(bar_plot)
+        st.bar_chart(chart_data2.iloc[:,4:].T)
 # # # 6. api - 현재 연령 분포
 
 
