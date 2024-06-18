@@ -47,7 +47,11 @@
 
 ## 📶 데이터파이프라인
 
+## 📶 서비스 플로
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/service_flow_0618.png)
+
 ## 📂 데이터 ERD
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/erd_0618.png)
 
 ## 🌎 기대효과
 
