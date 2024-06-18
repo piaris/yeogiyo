@@ -235,10 +235,14 @@ def get_focs_msg(area_nm) :
 def get_people_interval(area_nm) :
     data = fetch_data(area_nm)
     if data:
+        # 사람 수 데이터
         response_data = data.get('people_interval', '')
         clean_res_data = re.sub(r'[\/명]', '', response_data)
         people_interval = [value.split('~') for value in clean_res_data.split('|')]
-        result = [int(median([float(v) for v in value])) for value in people_interval]
-        return result
+        result_people = [int(median([float(v) for v in value])) for value in people_interval]
+        # 시간 데이터
+        response_time_data = data.get('time_cd', '')
+        result_time = [time.strip('|') for time in response_time_data.split('|')]
+        return result_people, result_time
     return None
 

@@ -36,6 +36,7 @@ st.set_page_config(
 # sql에서 데이터 불러오기
 realtime_df = sqldata.sql_realtime()
 naver_df = sqldata.sql_naver()
+predict_df = sqldata.sql_predict()
 # st.dataframe(realtime_df)
 category = realtime_df['CATEGORY_ENG'].unique()
 area_list = realtime_df['ENG_NM']
@@ -127,7 +128,7 @@ prop = fm.FontProperties(fname=fpath)
 
 
 
-# 3. 타이틀/로고 삽입
+# 2. 타이틀/로고 삽입
 
 
 web_header = st.container()
@@ -139,7 +140,7 @@ with web_header:
     st.header('The most crowded area in Seoul! :sunglasses:', divider='rainbow')
 
 
-# 4. 사이드바 구성
+# 3. 사이드바 구성
 
 with st.sidebar:
 
@@ -170,19 +171,20 @@ with st.sidebar:
     st.warning("🚧️ This app is still in beta. Please [check the version](https://github.com/piaris/yeogiyo) in the GitHub repo.")
     
     
-    
-AREA_CONGEST_LVL = '혼잡'
-AREA_CONGEST_MSG = '''사람이 몰려있을 수 있지만 크게 붐비지는 않아요. 도보 이동에 큰 제약이 없어요.'''
-AREA_PPLTN_MIN = '23000'
-AREA_PPLTN_MAX = '25000'
 
 
-# 5. 메인 서비스 3개 탭 생성
+# 4. 메인 서비스 3개 탭 생성
 tab1, tab2, tab3 = st.tabs(['area1', 'area2', 'area3'])
 with tab1:
 
-    # 5.1 약속장소 1개 선택
-    st.info("➡️ 1. Select location from the categories below")
+    # 5-1 약속장소 1개 선택
+    st.info("➡️ 1. Select date and time of your appointment")
+    selected_date = st.date_input("When is your date", value="today")
+    selected_time = st.time_input("Select your time", value="now", step=3600).hour
+    st.write("Your appointment is: ", selected_date, selected_time)
+
+    # 5.2 (완) 원하는 카테고리/장소 선택
+    st.info("➡️ 2. Select location from the categories below")
     # 팝업 기능
     @st.experimental_dialog("select your area")
     def select_area(item):
@@ -204,16 +206,12 @@ with tab1:
         f"You selected {selected_area} in {st.session_state.select_area['item']}."
 
 
-    # 5-2 약속장소 1개 선택
-    st.info("➡️ 2. Select date and time of your appointment")
-    selected_date = st.date_input("When is your date", value="today")
-    selected_time = st.time_input("Select your time", value="now", step=3600).hour
-    st.write("Your appointment is: ", selected_date, selected_time)
 
-    # 5.2 화면 default값 설정/출력
+
+    # 5.3. 화면 default값 api 호출 설정/출
+    # 1) 화면 default값 api 호출, 메시지 & 바그래프 출력
 
     default_area = "강남역"
-    default_category = "인구밀집지역"
 
     before_msg = apidata.get_brfore_msg(default_area)
     default_msg1 = st.text_area('Before 12 hours :balloon:', before_msg)
@@ -221,21 +219,42 @@ with tab1:
     focs_msg = apidata.get_focs_msg(default_area)
     default_msg2 = st.text_area('Next 12 hours', focs_msg)
 
+    interval, datetime_interval = apidata.get_people_interval(default_area)
+    # st.dataframe(interval)
+    colors = ['#353E6C'] * 12 + ['#8675FF']*1 + ['#FD7289']*11
+
+    fig_bar = plt.figure(figsize=(10,4))
+    plt.bar(datetime_interval, interval, color=colors)
+    plt.xlabel("Time Flow")
+    plt.ylabel("People counts")
+    # plt.grid()
+    plt.xticks(rotation=45)
+    plt.yticks()
+    
+    st.pyplot(fig_bar)
+
+    # apidata로 24시간 과거/미래 바그래프 출력
+    # interval_df = pd.DataFrame(
+    #     {
+    #         "유동인구" : interval[:-1],
+    #         "일자/시간" : datetime_interval[:-1]
+    #     }
+    # )
+    # st.bar_chart(interval_df, x='일자/시간', y='유동인구', color="#8675FF")
+
     api_default = SeoulData(default_area)
     df_ppltn = api_default.seoul_ppltn()
     # st.dataframe(df_ppltn)
 
+
+
+    # 5.4 Predict table에서 혼잡도 가져와서 파이차트, 예상 혼잡도 출력
     # 파이차트 임시 데이터 정의
     labels = '10th', '20th', '30th', '40th', '50th', '60th', '70th'
-    ratio = [15, 30, 30, 10, 5, 5, 5]
-    
-    # print(selected_area, selected_date, selected_time)
-    # print(predict_df.columns)
     try:
         st.session_state["selected_area"] = seoulcity_df[seoulcity_df["ENG_NM"]==selected_area]["AREA_NM"].values[0]
         st.session_state["selected_date"] = selected_date
         st.session_state["selected_time"] = selected_time
-        
     except:
         selected_area = "Gangnam station"
         selected_date = "2024-06-10"
@@ -243,10 +262,11 @@ with tab1:
         st.session_state["selected_area"] = seoulcity_df[seoulcity_df["ENG_NM"]==selected_area]["AREA_NM"].values[0]
         st.session_state["selected_date"] = selected_date
         st.session_state["selected_time"] = selected_time
-        
+
     cond1 = predict_df["AREA_NM_ENG"]==selected_area
     cond2 = predict_df["PPLTN_DATE"]==str(selected_date)
     cond3 = predict_df["PPLTN_TIME"]==str(selected_time).zfill(2)
+
     selected_df = predict_df[cond1 & cond2 & cond3] 
     # print(selected_df)
     if len(selected_df) == 0:
@@ -261,9 +281,9 @@ with tab1:
         "#16DBCC",
         "#DCFAF8",
         "#FFBB38",
-    ]
+    ]    
     explode = (0, 0, 0, 0, 0, 0, 0)
-    wedgeprops = {"width": 0.7, "edgecolor": "w", "linewidth": 5}
+    wedgeprops = {'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
 
     # 5-3  파이차트 그리기
 
@@ -291,7 +311,11 @@ with tab1:
 
     st.pyplot(fig)
 
-
+    #페이지 관리
+    if 'page' not in st.session_state:
+        st.session_state.page = 'main.py'
+    else:
+        'congest_Show.py'
 
 
     #6. 혼잡도 자세히 보기 -> congest_show페이지로 이동
@@ -311,7 +335,7 @@ with tab1:
                 file_name="area1.png",
                 mime="image/png",
                 )
-            
+        
 
 
 
@@ -356,6 +380,24 @@ with tab1:
     # 10 대신 언제 갈까
     with col2:
         st.metric(label="When should I go instead?", value = "date", delta="-10%")
+
+        if st.button("Click for congestion details"):
+            st.switch_page("pages/congest_show.py")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
