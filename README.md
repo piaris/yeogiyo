@@ -21,7 +21,7 @@
 ## 👍 팀원별 역할
 
 **조은별(팀장)** : **데이터분석** + **서비스 기획** 화면구현, 머신러닝 <br>
-**김서윤** : **백엔드** + **데이터엔지니어링** 머신러닝 보조 <br>
+**김서윤** : **데이터엔지니어링** 머신러닝 보조 <br>
 **유성민** : **데이터 분석** + **머신러닝** 데이터엔지니어링 보조 <br>
 
 ## 📉 데이터 출처
@@ -46,7 +46,7 @@
 [🙋‍♂️ 문제 해결 스토리](READERROR.md)
 
 ## 📶 데이터파이프라인
-![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/data_0618.png)
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/data_pipeline_architecture.png)
 
 ## 📶 서비스 플로
 ![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/service_flow_0618.png)
