@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div align="center">
 
 ![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/YEOGIYO__logobig.png)
@@ -57,3 +58,9 @@
 4. 파이썬으로 반응형 웹서비스 배포 기술 활용
 5. 네이버 실시간 크롤링 기술 획득과 활용
 6. 서울시 생활과 관광을 위한 혼잡도 기반 웹(공공데이터 활용사례 출품 예정)
+=======
+# yeogiyo
+플레이데이터 데이터엔지니어링 29기 5조 여기요 프로젝트
+
+[코드 설명](./sm.md)
+>>>>>>> c6e32e02b63960dfec37403786de8a6bf8d4d366
