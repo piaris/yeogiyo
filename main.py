@@ -179,71 +179,163 @@ with st.sidebar:
     
     st.warning("🚧️ This app is still in beta. Please [check the version](https://github.com/piaris/yeogiyo) in the GitHub repo.")
     
-    
-
-
 # 4. 메인 서비스 3개 탭 생성
 tab1, tab2, tab3 = st.tabs(['area1', 'area2', 'area3'])
 with tab1:
-
-    # 5.2 (완) 원하는 카테고리/장소 선택
-    st.info("➡️ 2. Select location from the categories below")
     # 팝업 기능
+    @st.experimental_dialog("select your area")
+    def select_area(value):
+        places=realtime_df[realtime_df['CATEGORY_ENG']==value]['ENG_NM'].values
+        area = st.radio("Select one location", places)
+        if st.button("select"):
+            st.session_state.select_area = {"value": value, "area": area}
+            st.rerun()
 
-    # 5-1 약속장소 1개 선택
-    st.info("➡️ 1. Select date and time of your appointment")
+    # 5.1 (완) 원하는 카테고리/장소 선택
+    st.info("➡️ 1. Select location from the categories below")
+    cols = st.columns([1,1,1,1,1])
+    
+    if "select_area" not in st.session_state:
+        for col, value in zip(cols, category):            
+            with col:
+                if st.button(value):
+                    select_area(value)
+    else:
+        selected_area = st.session_state.select_area['area']
+        f"You selected {selected_area} in {st.session_state.select_area['value']}."
+
+    # 5-2 약속장소 1개 선택
+    st.info("➡️ 2. Select date and time of your appointment")
     selected_date = st.date_input("When is your date", value="today")
     selected_time = st.time_input("Select your time", value="now", step=3600).hour
     st.write("Your appointment is: ", selected_date, selected_time)
 
+    print("st.session_state.select_area", st.session_state)
     
-    @st.experimental_dialog("select your area")
-    def select_area(item):
-        places=realtime_df[realtime_df['CATEGORY_ENG']==item]['ENG_NM'].values
-        area = st.radio("Select one location", places)
-        if st.button("select"):
-            st.session_state.select_area = {"item": item, "area": area}
-            st.experimental_rerun()
+    # 5.3. 화면 default값 api 호출 설정/출력
+    # 1) 화면 default값 api 호출, 메시지 & 바그래프 출력
+    if st.session_state.get("select_area") == None:
+        
+        default_area = "강남역"
+        before_msg = apidata.get_brfore_msg(default_area)
+        default_msg1 = st.text_area('Before 12 hours :balloon:', before_msg)
 
-    cols = st.columns([0.2,0.2,0.15,0.1,0.2])
-    
-    if "select_area" not in st.session_state:
-        for col, value in zip(cols, category):
-            with col:
-                if st.button(value):
-                    select_area(value)
+        focs_msg = apidata.get_focs_msg(default_area)
+        default_msg2 = st.text_area('Next 12 hours', focs_msg)
+
+        interval, datetime_interval = apidata.get_people_interval(default_area)
+        # st.dataframe(interval)
+        colors = ['#353E6C'] * 12 + ['#8675FF']*1 + ['#FD7289']*11
+
+        fig_bar = plt.figure(figsize=(10,4))
+        plt.bar(datetime_interval, interval, color=colors)
+        plt.xlabel("Time Flow")
+        plt.ylabel("People counts")
+        # plt.grid()
+        plt.xticks(rotation=45)
+        plt.yticks()
+        
+        st.pyplot(fig_bar)
+
+        # apidata로 24시간 과거/미래 바그래프 출력
+        # interval_df = pd.DataFrame(
+        #     {
+        #         "유동인구" : interval[:-1],
+        #         "일자/시간" : datetime_interval[:-1]
+        #     }
+        # )
+        # st.bar_chart(interval_df, x='일자/시간', y='유동인구', color="#8675FF")
+
+        api_default = SeoulData(default_area)
+        df_ppltn = api_default.seoul_ppltn()
+        # st.dataframe(df_ppltn)
+        
+
+
+        #페이지 관리
+        if 'page' not in st.session_state:
+            st.session_state.page = 'main.py'
+        else:
+            'congest_Show.py'
+
+
+        #6. 혼잡도 자세히 보기 -> congest_show페이지로 이동
+        #7. (완) 이미지로 저장하기
+        with open("result/kid.jpg", "rb") as file:
+
+            btn = st.download_button(
+                label="Save the result as image",
+                data=file,
+                file_name="area1.png",
+                mime="image/png",
+                )
+            
+
+        # 8. (작업중) 네이버 키워드 출력/링크 연결
+        #container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
+        container2 = st.container(border=True)
+        container2.subheader("This is Hot keyword in area")
+        #to do : 텍스트 리스트 받아서 naver_keyword라는 객체에 저장, 버튼 포문 돌려서 하나씩 링크버튼 생성
+
+        def on_word_click(location, keywords):
+            start_date, end_date = naver.set_datetime()
+            url =f"https://section.blog.naver.com/Search/Post.naver?pageNo=1&rangeType=WEEK&orderBy=sim&startDate={start_date}&endDate={end_date}&keyword={location}{keyword}"
+            return url
+        #f'<a href="{url}" target="_blank">{keyword}</a>'
+
+        with container2:
+            area_temp = "강남역"
+            start_date, end_date = naver.set_datetime()
+            keywords_df = naver_df[naver_df['AREA_NM'] == area_temp]
+            keywords = list(keywords_df['HASHTAG'])
+            st.text(keywords)
+            cols = st.columns(20)
+            for col, keyword in zip(cols, keywords):
+                naver_link = on_word_click(location=area_temp, keywords=keyword)
+                #st.text(naver_link)
+                col.link_button(keyword, naver_link)
+
+            #container2.write("This will show last")
+            # 클릭 가능한 링크 표시 
+            # '강남역', '맛집' 부분에 parmeter 받아온 거 들어가게 넣어주면 됨
+            # st.markdown(on_word_click('강남역','맛집'), unsafe_allow_html=True)
+            
+        # 9 대신 어디 갈까
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(label="Where should I go instead?", value = "station", delta="-5%")
+        
+        # 10 대신 언제 갈까
+        with col2:
+            st.metric(label="When should I go instead?", value = "date", delta="-10%")
+
+            if st.button("Click for congestion details"):
+                st.switch_page("pages/congest_show.py")
 
     else:
-        selected_area = st.session_state.select_area['area']
-        f"You selected {selected_area} in {st.session_state.select_area['item']}."
-
-
-
-
-    # 5.3. 화면 default값 api 호출 설정/출
-    # 1) 화면 default값 api 호출, 메시지 & 바그래프 출력
-    try:
-        
         # 5.4 Predict table에서 혼잡도 가져와서 파이차트, 예상 혼잡도 출력
         # 파이차트 임시 데이터 정의
         labels = '10th', '20th', '30th', '40th', '50th', '60th', '70th'
-        try:
-            st.session_state["selected_area"] = seoulcity_df[seoulcity_df["ENG_NM"]==selected_area]["AREA_NM"].values[0]
-            st.session_state["selected_date"] = selected_date
-            st.session_state["selected_time"] = selected_time
-        except:
-            selected_area = "Gangnam station"
-            selected_date = "2024-06-10"
-            selected_time = "00"
-            st.session_state["selected_area"] = seoulcity_df[seoulcity_df["ENG_NM"]==selected_area]["AREA_NM"].values[0]
-            st.session_state["selected_date"] = selected_date
-            st.session_state["selected_time"] = selected_time
+        st.session_state["selected_area"] = seoulcity_df[seoulcity_df["ENG_NM"]==selected_area]["AREA_NM"].values[0]
+        st.session_state["selected_date"] = selected_date
+        st.session_state["selected_time"] = selected_time
 
         cond1 = predict_df["ENG_NM"]==selected_area
         cond2 = predict_df["PPLTN_DATE"]==str(selected_date)
         cond3 = predict_df["PPLTN_TIME"]==str(selected_time).zfill(2)
 
         selected_df = predict_df[cond1 & cond2 & cond3] 
+        if select_area:
+            default_area = select_area
+            if len(selected_df) == 0:
+                congest_result = "None"
+            else:
+                congest_result = selected_df['PERCENTAGE'].iloc[0]
+            fig, ax = plt.subplots()
+            ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
+            
         # print(selected_df)
         if len(selected_df) == 0:
             ratio = [1] * 7
@@ -273,120 +365,7 @@ with tab1:
         # ax.set_title("혼잡도 현황", fontproperties=prop)
         st.pyplot(fig)
 
-        if default_area:
-            default_area = "강남역"
 
-            before_msg = apidata.get_brfore_msg(default_area)
-            default_msg1 = st.text_area('Before 12 hours :balloon:', before_msg)
-
-            focs_msg = apidata.get_focs_msg(default_area)
-            default_msg2 = st.text_area('Next 12 hours', focs_msg)
-
-            interval, datetime_interval = apidata.get_people_interval(default_area)
-            # st.dataframe(interval)
-            colors = ['#353E6C'] * 12 + ['#8675FF']*1 + ['#FD7289']*11
-
-            fig_bar = plt.figure(figsize=(10,4))
-            plt.bar(datetime_interval, interval, color=colors)
-            plt.xlabel("Time Flow")
-            plt.ylabel("People counts")
-            # plt.grid()
-            plt.xticks(rotation=45)
-            plt.yticks()
-            
-            st.pyplot(fig_bar)
-
-            # apidata로 24시간 과거/미래 바그래프 출력
-            # interval_df = pd.DataFrame(
-            #     {
-            #         "유동인구" : interval[:-1],
-            #         "일자/시간" : datetime_interval[:-1]
-            #     }
-            # )
-            # st.bar_chart(interval_df, x='일자/시간', y='유동인구', color="#8675FF")
-
-            api_default = SeoulData(default_area)
-            df_ppltn = api_default.seoul_ppltn()
-            # st.dataframe(df_ppltn)
-            
-            if select_area:
-                default_area = select_area
-                if len(selected_df) == 0:
-                    congest_result = "None"
-                else:
-                    congest_result = selected_df['PERCENTAGE'].iloc[0]
-                ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
-                
-
-            st.pyplot(fig)
-
-            #페이지 관리
-            if 'page' not in st.session_state:
-                st.session_state.page = 'main.py'
-            else:
-                'congest_Show.py'
-
-
-            #6. 혼잡도 자세히 보기 -> congest_show페이지로 이동
-            #7. (완) 이미지로 저장하기
-            with open("result/kid.jpg", "rb") as file:
-
-                btn = st.download_button(
-                    label="Save the result as image",
-                    data=file,
-                    file_name="area1.png",
-                    mime="image/png",
-                    )
-                
-
-
-
-            # 8. (작업중) 네이버 키워드 출력/링크 연결
-            #container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
-            container2 = st.container(border=True)
-            container2.subheader("This is Hot keyword in area")
-            #to do : 텍스트 리스트 받아서 naver_keyword라는 객체에 저장, 버튼 포문 돌려서 하나씩 링크버튼 생성
-
-
-            def on_word_click(location, keywords):
-                start_date, end_date = naver.set_datetime()
-                url =f"https://section.blog.naver.com/Search/Post.naver?pageNo=1&rangeType=WEEK&orderBy=sim&startDate={start_date}&endDate={end_date}&keyword={location}{keyword}"
-                return url
-            #f'<a href="{url}" target="_blank">{keyword}</a>'
-
-
-            with container2:
-                area_temp = "강남역"
-                start_date, end_date = naver.set_datetime()
-                keywords_df = naver_df[naver_df['AREA_NM'] == area_temp]
-                keywords = list(keywords_df['HASHTAG'])
-                st.text(keywords)
-                cols = st.columns(20)
-                for col, keyword in zip(cols, keywords):
-                    naver_link = on_word_click(location=area_temp, keywords=keyword)
-                    #st.text(naver_link)
-                    col.link_button(keyword, naver_link)
-
-                #container2.write("This will show last")
-                # 클릭 가능한 링크 표시 
-                # '강남역', '맛집' 부분에 parmeter 받아온 거 들어가게 넣어주면 됨
-                # st.markdown(on_word_click('강남역','맛집'), unsafe_allow_html=True)
-            
-            # 9 대신 어디 갈까
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.metric(label="Where should I go instead?", value = "station", delta="-5%")
-            
-            # 10 대신 언제 갈까
-            with col2:
-                st.metric(label="When should I go instead?", value = "date", delta="-10%")
-
-                if st.button("Click for congestion details"):
-                    st.switch_page("pages/congest_show.py")
-    except:
-        pass
 
 
 with tab2:
