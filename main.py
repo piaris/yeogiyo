@@ -118,7 +118,7 @@ class SeoulData():
 # 1. 기본 설정
 # 한글폰트 설정
 #print(plt.rcParams['font.family'])
-plt.rcParams['font.family'] = "NanumGothic"
+plt.rcParams['font.family'] = "Malgun Gothic"
 plt.rcParams['axes.unicode_minus'] = False
 
 # 그래프 안의 한글폰트 설정
@@ -139,6 +139,16 @@ with web_header:
     st.header('The most crowded area in Seoul! :sunglasses:', divider='rainbow')
 
 
+@st.cache_resource
+def print_congestArea():
+    return apidata.print_congestArea()
+
+@st.cache_resource
+def print_congestRoad():
+    return apidata.print_congestRoad()
+
+
+
 # 3. 사이드바 구성
 
 with st.sidebar:
@@ -148,10 +158,10 @@ with st.sidebar:
     st.title("Welcome 👋 Yeogiyo")
     
     st.subheader(":car: The busiest place now?")
-    st.write(apidata.print_congestArea())
+    st.write(print_congestArea())
 
     st.subheader(":people_holding_hands: The most congested place now?")
-    st.write(apidata.print_congestRoad())
+    st.write(print_congestRoad())
 
     # 경계선 & 아래 깃박스 색깔
     st.markdown("""<hr style="height:5px;border:none;color:#8675FF;background-color:#8675FF;" /> """, unsafe_allow_html=True)
@@ -262,7 +272,7 @@ with tab1:
         st.session_state["selected_date"] = selected_date
         st.session_state["selected_time"] = selected_time
 
-    cond1 = predict_df["AREA_NM_ENG"]==selected_area
+    cond1 = predict_df["ENG_NM"]==selected_area
     cond2 = predict_df["PPLTN_DATE"]==str(selected_date)
     cond3 = predict_df["PPLTN_TIME"]==str(selected_time).zfill(2)
 

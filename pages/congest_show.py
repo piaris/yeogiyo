@@ -9,7 +9,7 @@ import sqldata as sqldata
 
 # 기본설정 - 한글폰트
 #print(plt.rcParams['font.family'])
-plt.rcParams['font.family'] = "NanumGothic"
+plt.rcParams['font.family'] = "Malgun Gothic"
 plt.rcParams['axes.unicode_minus'] = False
 # 기본설정 - 디자인
 # css_file = "style.css"
@@ -29,7 +29,9 @@ if st.session_state:
     selected_time = st.session_state["selected_time"]
 
 else:
-    area = "강남역"
+    selected_area = "강남역"
+    selected_date = "2024-06-10"
+    selected_time = "00"    
 
 st.text(selected_area)
 st.text(selected_date)
@@ -77,7 +79,6 @@ if selected_date and selected_time and selected_area:
         st.dataframe(chart_data2)
 
         bar_plot = plt.barh(chart_data2.columns, chart_data2.iloc[0])
-        st.pyplot(bar_plot)
         st.bar_chart(chart_data2.iloc[:,4:].T)
 # # # 6. api - 현재 연령 분포
 
