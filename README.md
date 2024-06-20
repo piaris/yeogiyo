@@ -1,9 +1,10 @@
-## ⭐ Yeogiyo 서울시 혼잡도 공유서비스 ⭐
 
+## ⭐ Yeogiyo 서울시 혼잡도 공유서비스 ⭐
+<div align="center">
 ![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/YEOGIYO__logobig.png)
 
 - 배포 url : https://yeogiyo.streamlit.app/
-
+</div>
 <br>
 
 안녕하세요! 우리 프로젝트 깃에 오신것을 환영합니다.🎈
@@ -30,9 +31,13 @@
 | :------: |  :------: | :------: |
 | [<img src="https://avatars.githubusercontent.com/u/141891949?v=4" height=150 width=150> <br/> @piaris](https://github.com/piaris) | [<img src="https://avatars.githubusercontent.com/u/156580003?v=4" height=150 width=150> <br/> @kimppu](https://github.com/kimppu) | [<img src="https://avatars.githubusercontent.com/u/68213803?v=4" height=150 width=150> <br/> @YUSEONGMIN](https://github.com/YUSEONGMIN) |
 
-**조은별(팀장)** : **데이터분석** + **서비스 기획** 화면구현, 머신러닝
-**김서윤** : **백엔드** + **데이터엔지니어링** 머신러닝 보조
-**유성민** : **데이터 분석** + **머신러닝** 데이터엔지니어링 보조
+**조은별(팀장)** : **데이터분석** + **서비스 기획** 화면구현, 머신러닝 <br>
+**김서윤** : **백엔드** + **데이터엔지니어링** 머신러닝 보조 <br>
+**유성민** : **데이터 분석** + **머신러닝** 데이터엔지니어링 보조 <br>
+
+</div>
+
+<br>
 
 ## 2. 📉 데이터 출처
 
