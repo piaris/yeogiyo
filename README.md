@@ -93,19 +93,19 @@
 
 ## 5. 채택한 기술스택
 
-[🙋‍♂️ 스택 사용 스토리](READERROR_0.md)
+[🙋‍♂️ 스택 사용 스토리](/Document/READERROR_0.md)
 
 <br>
 
 ## 6. 🧊 오류/문제 해결
 
-[🙋‍♂️ Naver crawling 작업 시간 이슈](READERROR_1.md)
+[🙋‍♂️ Naver crawling 작업 시간 이슈](/Document/READERROR_1.md)
 
-[🙋‍♂️ 데이터 수집시 exception 발생](READERROR_2.md)
+[🙋‍♂️ 데이터 수집시 exception 발생](/Document/READERROR_2.md)
 
-[🙋‍♂️ data file 용량 이슈](READERROR_3.md)
+[🙋‍♂️ data file 용량 이슈](/Document/READERROR_3.md)
 
-[🙋‍♂️ 모델링 이슈](READERROR_4.md)
+[🙋‍♂️ 모델링 이슈](/Document/READERROR_4.md)
 
 <br>
 
