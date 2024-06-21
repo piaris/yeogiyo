@@ -33,6 +33,7 @@ def get_congestArea_data() :
     try :
         response = requests.get(url, headers=header)
         response_data = json.loads(response.text)
+        print(response_data)
         congest_data=response_data['row'][:5]
         for data in congest_data:
             congest_lv = data['area_congest_lvl']
