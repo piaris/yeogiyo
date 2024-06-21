@@ -4,7 +4,8 @@
 
 ![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/YEOGIYO__logobig.png)
 
-배포 url : https://yeogiyo.streamlit.app/
+배포 url : http://3.35.176.139:8501/
+개발 기간 : 2024-04-30 ~ 2024-06-24
 
 안녕하세요! 우리 프로젝트 깃에 오신것을 환영합니다.🎈<br>
 **'여기요'** [서울시 혼잡도 공유서비스] 는 <u>2024년 Playdata final progect</u> 로 진행되었으며 <br> 서울시 도시 데이터를 활용하여 장소별 유동인구와 혼잡도 예측서비스 제공합니다.
@@ -61,36 +62,21 @@
 
 <br>
 
-## 3. 채택한 기술스택과 브랜치 전략
+# 4. 👻 화면 소개
 
-[🙋‍♂️ 스택 사용 스토리](READSTACK.md)
+## Service Flow Chart
 
-<br>
-
-## 4. 🧊 오류/문제 해결
-
-[🙋‍♂️ 문제 해결 스토리](READERROR.md)
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/service_0618.png)
 
 <br>
 
-## 웹 아키텍처
+### [메인화면]
 
-![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/web_0620.png)
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/main_0620.png)
 
-<br>
+### [혼잡도 화면]
 
-## 📶 데이터파이프라인
-![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/data_pipeline_architecture.png)
-
-<br>
-
-## 📂 데이터 ERD
-
-![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/erd_0618.png)
-
-<br>
-
-## 개발 기간 : 2024-04-29 ~ 2024-06-21
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/congest_show_0622.png)
 
 <br>
 
@@ -105,18 +91,38 @@
 
 <br>
 
-# 👻 화면 소개
+## 5. 채택한 기술스택
 
-## Service Flow Chart
-
-![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/service_0618.png)
+[🙋‍♂️ 스택 사용 스토리](/Document/READERROR_0.md)
 
 <br>
 
-### [메인화면]
+## 6. 🧊 오류/문제 해결
 
-![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/main_0620.png)
+[🙋‍♂️ Naver crawling 작업 시간 이슈](/Document/READERROR_1.md)
+
+[🙋‍♂️ 데이터 수집시 exception 발생](/Document/READERROR_2.md)
+
+[🙋‍♂️ data file 용량 이슈](/Document/READERROR_3.md)
+
+[🙋‍♂️ 모델링 이슈](/Document/READERROR_4.md)
 
 <br>
 
-### [혼잡도 화면]
+## 웹 아키텍처
+
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/web_0620.jpg)
+
+<br>
+
+## 📶 데이터파이프라인
+
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/data_pipeline_architecture.png)
+
+<br>
+
+## 📂 데이터 ERD
+
+![ICON](https://github.com/piaris/yeogiyo/blob/main/Gallery/erd_0618.png)
+
+<br>

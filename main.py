@@ -26,7 +26,6 @@ import naverpage as naver
 from googletrans import Translator
 import time
 import pyautogui
-from PIL import Image
 
 st.set_page_config(
     page_title="The most crowded area in Seoul! :sunglasses:",
@@ -305,7 +304,7 @@ with tab1:
             #     st.success(f"이미지가 {save_path}에 저장되었습니다!")
 
 
-        # 8. (작업중) 네이버 키워드 출력/링크 연결
+        # 8. 네이버 키워드 출력/링크 연결
         #container2.write("네이버 키워드 + 네이버 키워드 링크 연결")
         container2 = st.container(border=True)
         container2.subheader("This is Hot keyword in area")
@@ -329,24 +328,6 @@ with tab1:
                 #st.text(naver_link)
                 col.link_button(keyword, naver_link)
 
-            #container2.write("This will show last")
-            # 클릭 가능한 링크 표시 
-            # '강남역', '맛집' 부분에 parmeter 받아온 거 들어가게 넣어주면 됨
-            # st.markdown(on_word_click('강남역','맛집'), unsafe_allow_html=True)
-
-        # 9 대신 어디 갈까
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.metric(label="Where should I go instead?", value = "station", delta="-5%")
-
-        # 10 대신 언제 갈까
-        with col2:
-            st.metric(label="When should I go instead?", value = "date", delta="-10%")
-
-            if st.button("Click for congestion details"):
-                st.switch_page("pages/congest_show.py")
 
     else:
         # 5.4 Predict table에서 혼잡도 가져와서 파이차트, 예상 혼잡도 출력
@@ -367,36 +348,36 @@ with tab1:
                 congest_result = "None"
             else:
                 congest_result = selected_df['PERCENTAGE'].iloc[0]
-            fig, ax = plt.subplots()
-            ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
+
     # print(selected_df)
-    if len(selected_df) == 0:
-        ratio = [1] * 7
-    else:
-        ratio = selected_df[selected_df.columns[selected_df.columns.str.contains("RATE_..")]].iloc[0]
-    colors = [
-        "#8675FF",
-        "#FD7289",
-        "#FF9A3E",
-        "#353E6C",
-        "#16DBCC",
-        "#DCFAF8",
-        "#FFBB38",
-    ]    
-    explode = (0, 0, 0, 0, 0, 0, 0)
-    wedgeprops = {'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
+        if len(selected_df) == 0:
+            ratio = [1] * 7
+        else:
+            ratio = selected_df[selected_df.columns[selected_df.columns.str.contains("RATE_..")]].iloc[0]
+        colors = [
+            "#8675FF",
+            "#FD7289",
+            "#FF9A3E",
+            "#353E6C",
+            "#16DBCC",
+            "#DCFAF8",
+            "#FFBB38",
+        ]    
+        explode = (0, 0, 0, 0, 0, 0, 0)
+        wedgeprops = {'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
 
-    fig, ax = plt.subplots()
-    ax.pie(ratio, colors=colors, labels=labels, counterclock=False, wedgeprops=dict(width=0.6),
-        explode=explode, shadow=False, startangle=90, 
-        autopct='%.1f%%') #,  wedgeprops=wedgeprops,autopct=(labels, ratio), textprops=dict(color="w")
+        fig, ax = plt.subplots()
+        ax.pie(ratio, colors=colors, labels=labels, counterclock=False, wedgeprops=dict(width=0.6),
+            explode=explode, shadow=False, startangle=90, 
+            autopct='%.1f%%') #,  wedgeprops=wedgeprops,autopct=(labels, ratio), textprops=dict(color="w")
 
-    #가운데에 텍스트 추가
-    center_circle = plt.Circle((0, 0), 0.3, fc='white')
-    fig.gca().add_artist(center_circle)
-    ax.axis('equal') # 파이차트를 원형으로 유지
-    # ax.set_title("혼잡도 현황", fontproperties=prop)
-    st.pyplot(fig)
+        #가운데에 텍스트 추가
+        center_circle = plt.Circle((0, 0), 0.3, fc='white')
+        fig.gca().add_artist(center_circle)
+        ax.axis('equal') # 파이차트를 원형으로 유지
+        # ax.set_title("혼잡도 현황", fontproperties=prop)
+        ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
+        st.pyplot(fig)
 
 
     # 9 대신 어디 갈까
@@ -404,11 +385,14 @@ with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric(label="Where should I go instead?", value = "station", delta="-5%")
+        st.metric(label="Where should I go instead?", value = "Nonhyun Station", delta="-5%")
+
+
     
     # 10 대신 언제 갈까
+
     with col2:
-        st.metric(label="When should I go instead?", value = "date", delta="-10%")
+        st.metric(label="When should I go instead?", value = "2024-06-30", delta="-10%")
 
         if st.button("Click for congestion details"):
             st.switch_page("pages/congest_show.py")
@@ -439,6 +423,7 @@ with tab1:
 
 with tab2:
     st.subheader("area 2")
+
 
 with tab3:
     st.subheader("area 3")
