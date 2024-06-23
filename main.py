@@ -1,15 +1,3 @@
-text = ("""1. 날짜 선택, 시간 선택
-2. 장소 선택 -> station_select modal
-3. 혼잡도 지수, 시계열 예측 모델 결과 -> congest_show page 이동
-    기준: 지난 3년간의 혼잡도를 100으로 했을때 과거 대비 퍼센트 지수
-4. 네이버 연관 키워드 10개, 네이버 링크 / 7days
-    기준: 네이버api 연관키워드 기준
-        - 전지역 공통/중복키워드 제외
-        - #번출구, #호선 제외
-5. 대신 어디 갈까
-    기준: 선택 날짜/장소 기준 근방 5군데 중 혼잡도가 가장 낮은 곳 출력 + 과거 대비 -#%
-6. 대신 언제 갈까 -> another_date page 이동""")
-
 
 import os
 import pandas as pd
@@ -216,8 +204,8 @@ with tab1:
     # 5.1 (완) 원하는 카테고리/장소 선택
     st.info("➡️ 1. Select location from the categories below")
     st.markdown('''
-                :point_right: Just select a location to get real-time information on Seoul city data.  
-                (Current floating population & congestion information for the next 12 hours)
+                :point_right: Without selecting the place, date and time,   
+                realtime congest result of 'Gangnam Station' from Seoul city data will be showed.
                 ''')
     cols = st.columns([1,1,1,1,1])
     
@@ -314,7 +302,6 @@ with tab1:
             start_date, end_date = naver.set_datetime()
             url =f"https://section.blog.naver.com/Search/Post.naver?pageNo=1&rangeType=WEEK&orderBy=sim&startDate={start_date}&endDate={end_date}&keyword={location}{keyword}"
             return url
-        #f'<a href="{url}" target="_blank">{keyword}</a>'
 
         with container2:
             area_temp = "강남역"
@@ -342,12 +329,15 @@ with tab1:
         cond3 = predict_df["PPLTN_TIME"]==str(selected_time).zfill(2)
 
         selected_df = predict_df[cond1 & cond2 & cond3] 
+        selected_df.drop_duplicates(inplace=True)
         if select_area:
             default_area = select_area
             if len(selected_df) == 0:
                 congest_result = "None"
             else:
                 congest_result = selected_df['PERCENTAGE'].iloc[0]
+            fig, ax = plt.subplots()
+            ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
 
     # print(selected_df)
         if len(selected_df) == 0:
@@ -370,7 +360,7 @@ with tab1:
         ax.pie(ratio, colors=colors, labels=labels, counterclock=False, wedgeprops=dict(width=0.6),
             explode=explode, shadow=False, startangle=90, 
             autopct='%.1f%%') #,  wedgeprops=wedgeprops,autopct=(labels, ratio), textprops=dict(color="w")
-
+        
         #가운데에 텍스트 추가
         center_circle = plt.Circle((0, 0), 0.3, fc='white')
         fig.gca().add_artist(center_circle)
@@ -379,44 +369,38 @@ with tab1:
         ax.text(0,0,congest_result, ha='center', va='center', fontsize=32)
         st.pyplot(fig)
 
-
-    # 9 대신 어디 갈까
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.metric(label="Where should I go instead?", value = "Nonhyun Station", delta="-5%")
-
-
-    
-    # 10 대신 언제 갈까
-
-    with col2:
-        st.metric(label="When should I go instead?", value = "2024-06-30", delta="-10%")
-
-        if st.button("Click for congestion details"):
-            st.switch_page("pages/congest_show.py")
+        st.write("congest value: ", selected_df["PREDICT"].values[0])
+        
+        re_cond1 = realtime_df["ENG_NM"]==selected_area
+        st.write(realtime_df[re_cond1])
+        st.write(pd.to_datetime("2024-06-14") > pd.to_datetime(selected_date))
+        # re_cond3 = realtime_df["PPLTN_TIME"]==str(selected_date selected_time).zfill(2)
+        # st.write(realtime_df.columns)
+        # "MALE_PPLTN_RATE FEMALE_PPLTN_RATE"
 
 
 
 
+        # 9 대신 어디 갈까
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(label="Where should I go instead?", value = "Nonhyun Station", delta="-5%")
+
+
+        
+        # 10 대신 언제 갈까
+
+        with col2:
+            st.metric(label="When should I go instead?", value = "2024-06-30", delta="-10%")
+
+            if st.button("Click for congestion details"):
+                st.switch_page("pages/congest_show.py")
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(st.session_state)
 
 
 
